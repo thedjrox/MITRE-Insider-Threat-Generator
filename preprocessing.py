@@ -18,6 +18,9 @@ for file in os.listdir(folder_path):
     if os.path.isfile(file_path):
         df = pd.read_excel(f'{file_path}', engine='openpyxl')
         print(f'{file}')
+
+        for col in df.select_dtypes(include=['datetime']):
+            df[col] = df[col].astype(str)
         dataset = Dataset.from_pandas(df)
 
         
