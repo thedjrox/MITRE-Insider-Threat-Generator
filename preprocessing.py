@@ -16,7 +16,7 @@ for file in os.listdir(folder_path):
     file_path = os.path.join(folder_path, file)
     #Does action to each file
     if file.endswith('.csv'):
-        df = pd.read_csv(f'{file_path}', engine='openpyxl')
+        df = pd.read_csv(f'{file_path}')
         print(f'{file}')
 
         
