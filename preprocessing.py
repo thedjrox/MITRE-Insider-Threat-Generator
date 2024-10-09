@@ -12,13 +12,11 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 folder_path = os.path.join(curr_dir, folder_name)
 
 #Goes through each file in folder
-
 for file in os.listdir(folder_path):
     file_path = os.path.join(folder_path, file)
     #Does action to each file
     if file.endswith('.csv'):
         df = pd.read_csv(f'{file_path}', encoding='utf-8')
-        print(f'{file}')
         dataset = Dataset.from_pandas(df)
         unqiue_tweets = []
         col_name = ""
@@ -34,9 +32,3 @@ for file in os.listdir(folder_path):
         unique_tweets = set(raw_tweet_dataset[col_name])      
         
         tweet_dataset = Dataset.from_dict({col_name: list(unique_tweets)})
-        
-
-
-        
-
-
