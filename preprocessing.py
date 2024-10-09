@@ -31,4 +31,5 @@ for file in os.listdir(folder_path):
              
         unique_tweets = set(raw_tweet_dataset[col_name])      
         
+        #Variable to use that stores unqiue tweets
         tweet_dataset = Dataset.from_dict({col_name: list(unique_tweets)})
