@@ -18,6 +18,12 @@ for file in os.listdir(folder_path):
     if file.endswith('.csv'):
         df = pd.read_csv(f'{file_path}', engine='openpyxl')
         print(f'{file}')
-
         
+#created a filtered dataframe and only the DocNumber and textasInput(tweets) columns
+df_filtered = df[['DocNumber', 'TextAsInput.MiT.LTR']]
+
+#save the filtered dataframe to a new file
+filtered_file_path = os.path.join(folder_path, f'filtered_{file}')
+#setting index to false gets rid of indexing each tweet, (ex. 0: tweet1, 1: tweet2,...)
+df_filtered.to_csv(filtered_file_path, index=False)
 
