@@ -22,12 +22,16 @@ for file in os.listdir(folder_path):
         dataset = Dataset.from_pandas(df)
         
         if 'Tweet' in dataset.column_names:
+            #Removes all columns but the Tweets
             tweet_dataset = dataset.map(lambda x: {'Tweet': x['Tweet']}, remove_columns=[col for col in dataset.column_names if col != 'Tweet'])
+            #Removes any duplicate Values in Dataset
+            tweet_dataset = tweet_dataset.unique('Tweet')
         else:
+            #Removes all columns but the Tweets
             tweet_dataset = dataset.map(lambda x: {'TextAsInput.MiT.LTR': x['TextAsInput.MiT.LTR']}, remove_columns=[col for col in dataset.column_names if col != 'TextAsInput.MiT.LTR'])
-        #dataset.remove_columns(columns_to_remove)
-        print(tweet_dataset[0]);
+            #Removes any duplicate Values in Dataset
+            tweet_dataset = tweet_dataset.unique('TextAsInput.MiT.LTR')       
+        
         
 
-        
 
