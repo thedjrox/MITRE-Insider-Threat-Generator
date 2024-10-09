@@ -20,18 +20,23 @@ for file in os.listdir(folder_path):
         df = pd.read_csv(f'{file_path}', encoding='utf-8')
         print(f'{file}')
         dataset = Dataset.from_pandas(df)
-        
+        unqiue_tweets = []
+        col_name = ""
         if 'Tweet' in dataset.column_names:
+            col_name = "Tweet" 
             #Removes all columns but the Tweets
-            tweet_dataset = dataset.map(lambda x: {'Tweet': x['Tweet']}, remove_columns=[col for col in dataset.column_names if col != 'Tweet'])
-            #Removes any duplicate Values in Dataset
-            tweet_dataset = tweet_dataset.unique('Tweet')
+            raw_tweet_dataset = dataset.map(lambda x: {col_name: x[col_name]}, remove_columns=[col for col in dataset.column_names if col != col_name])
         else:
+            col_name = "TextAsInput.MiT.LTR"
             #Removes all columns but the Tweets
-            tweet_dataset = dataset.map(lambda x: {'TextAsInput.MiT.LTR': x['TextAsInput.MiT.LTR']}, remove_columns=[col for col in dataset.column_names if col != 'TextAsInput.MiT.LTR'])
-            #Removes any duplicate Values in Dataset
-            tweet_dataset = tweet_dataset.unique('TextAsInput.MiT.LTR')       
+            raw_tweet_dataset = dataset.map(lambda x: {col_name: x[col_name]}, remove_columns=[col for col in dataset.column_names if col != col_name])
+             
+        unique_tweets = set(raw_tweet_dataset[col_name])      
         
+        tweet_dataset = Dataset.from_dict({col_name: list(unique_tweets)})
+        
+
+
         
 
 
