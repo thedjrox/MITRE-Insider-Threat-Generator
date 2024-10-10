@@ -33,7 +33,6 @@ for file in os.listdir(folder_path):
             raw_tweet_dataset = dataset.map(lambda x: {col_name: x[col_name]}, remove_columns=[col for col in dataset.column_names if col != col_name])
              
         unique_tweets = set(raw_tweet_dataset[col_name])
-        print(len(unique_tweets))      
         
         #Variable to use that stores unqiue tweets
         tweet_dataset = Dataset.from_dict({"Tweet": list(unique_tweets)})
