@@ -3,6 +3,8 @@ import pandas as pd #install pandas
 from datasets import Dataset, concatenate_datasets #install datasets
 from transformers import MarianMTModel, MarianTokenizer
 
+#****to install transformers library, make sure to run "pip install transformers torch"****
+
 #translates tweets of all languages to English using MarianMTModel
 def translate_batch(tweets):
     # Load the model and tokenizer
