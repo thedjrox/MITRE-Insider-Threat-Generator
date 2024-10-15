@@ -1,9 +1,13 @@
 import os #Used to get directories and locate datasets
 import pandas as pd #install pandas
 from datasets import Dataset, concatenate_datasets #install datasets
+import torch #install torch
 from transformers import MarianMTModel, MarianTokenizer
 
-#****to install transformers library, make sure to run "pip install transformers torch"****
+#to install transformers library, make sure to run "pip install transformers torch"
+#install sentencepiece (text tokenizer), make sure to run "pip install sentencepiece"
+#pip install sacremoses, tokenizer tool that can improve the functionality of MarianMT models
+
 
 #translates tweets of all languages to English using MarianMTModel
 def translate_batch(tweets):
