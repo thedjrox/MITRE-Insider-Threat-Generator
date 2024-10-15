@@ -79,7 +79,7 @@ for file in os.listdir(folder_path):
         batch_size = 16
         translated_tweets = []
         #iterate through the tweets through increments of batch_size, (ex. 0, 16, 32, ...)
-        for i in range(0, len(non_enlglish_tweets), batch_size):
+        for i in range(0, len(non_english_tweets), batch_size):
             #slices unique_tweets into a batch of 16 every iteration and saves it into a list called batch
             batch = list(non_english_tweets)[i:i + batch_size]
             #translates the batch and appends it to translated_tweets list
