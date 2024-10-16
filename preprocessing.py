@@ -37,6 +37,8 @@ def is_english(text):
         return False
 
 
+
+
 #Folder Name
 folder_name = 'Targeted Individual Twitter Dataset'
 
@@ -56,7 +58,9 @@ for file in os.listdir(folder_path):
     if file.endswith('.csv'):
         df = pd.read_csv(f'{file_path}', encoding='utf-8')
         dataset = Dataset.from_pandas(df)
-        unique_tweets = []
+
+        unqiue_tweets = []
+
         col_name = ""
         if 'Tweet' in dataset.column_names:
             col_name = "Tweet" 
@@ -70,6 +74,7 @@ for file in os.listdir(folder_path):
         unique_tweets = set(raw_tweet_dataset[col_name])
         
         #Variable to use that stores unqiue tweets
+
         #tweet_dataset = Dataset.from_dict({"Tweet": list(unique_tweets)})
 
         non_english_tweets = [tweet for tweet in unique_tweets if not is_english(tweet)]
@@ -93,4 +98,7 @@ for file in os.listdir(folder_path):
 
         # All combined datasets
         dataset_main = concatenate_datasets([dataset_main, tweet_dataset])
+    
+
+
 
