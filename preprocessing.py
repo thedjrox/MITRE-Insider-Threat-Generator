@@ -5,6 +5,8 @@ import re  # Used to remove special characters
 from nltk.corpus import stopwords, wordnet  # install nltk
 from nltk.tokenize import word_tokenize  # install nltk
 from nltk.stem import WordNetLemmatizer  # install nltk
+import string  # Used to remove punctuation
+import emoji  # Used to remove emojis
 
 
 STOPWORDS = set(stopwords.words("english"))  # Set of stopwords
@@ -25,6 +27,21 @@ def remove_retweet_symbol(text):
 # Function to lemmatize words in a string
 def lemmatize_text(text):
     return " ".join(lemmatizer.lemmatize(word) for word in text.split())
+
+
+# Function to lowercase the text
+def to_lowercase(text):
+    return text.lower()
+
+
+# Function to remove punctuation
+def remove_punctuation(text):
+    return text.translate(str.maketrans("", "", string.punctuation))
+
+
+# Function to remove emojis
+def remove_emojis(text):
+    return emoji.replace_emoji(text, replace="")
 
 
 # Folder Name
@@ -82,14 +99,19 @@ original_and_processed = []
 # Process stopwords, retweet symbols, and lemmatization
 for tweet in all_unique_tweets:
 
-    cleaned_tweet = remove_retweet_symbol(tweet)
+    cleaned_tweet = remove_retweet_symbol(tweet)  # Remove retweet symbols
+    cleaned_tweet = to_lowercase(cleaned_tweet)  # Lowercase the text
+    cleaned_tweet = remove_emojis(cleaned_tweet)  # Remove emojis
+    cleaned_tweet = remove_punctuation(cleaned_tweet)  # Remove punctuation
+    processed_tweet = lemmatize_text(
+        remove_stopwords(cleaned_tweet)
+    )  # Remove stopwords and lemmatize
 
-    processed_tweet = lemmatize_text(remove_stopwords(cleaned_tweet))
     original_and_processed.append((tweet, processed_tweet))
 
-# # Printing the original and processed tweets
-# for original, processed in original_and_processed:
-#     print(f"Original: {original}\nProcessed: {processed}\n")
+# Printing the original and processed tweets
+for original, processed in original_and_processed:
+    print(f"Original: {original}\nProcessed: {processed}\n")
 
 # Create the final dataset from the processed tweets if needed
 output_tweets = [processed for _, processed in original_and_processed]
