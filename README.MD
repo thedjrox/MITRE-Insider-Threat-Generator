@@ -15,7 +15,7 @@ This project is a Python-based application that generates tweets simulating diff
 
 ### Prerequisites
 
-- Python 3.8 or later
+- Python 3.9 or later
 - Required Python packages (install with `pip install -r requirements.txt`)
 
 ### Installation
@@ -36,11 +36,11 @@ This project is a Python-based application that generates tweets simulating diff
 
 To generate tweets, run the program from the command line and specify the type of threat tweet you want to create.
 
-```bash
-python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
+  ```bash
+  python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
 
-Example:
-python generate_tweet.py --threat_type medical --mode discreet
+  Example:
+  python generate_tweet.py --threat_type medical --mode discreet
 
 ### Configuration
 
