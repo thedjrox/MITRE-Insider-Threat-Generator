@@ -16,6 +16,9 @@ model_name = "Helsinki-NLP/opus-mt-mul-en"  # Multi-language to English model
 tokenizer = MarianTokenizer.from_pretrained(model_name)
 model = MarianMTModel.from_pretrained(model_name)
 
+
+
+
 STOPWORDS = set(stopwords.words("english"))  # Set of stopwords
 lemmatizer = WordNetLemmatizer()  # Lemmatizer object
 
@@ -32,13 +35,16 @@ def is_english(text):
     lang, confidence = langid.classify(text)
     return lang == 'en'
 
+
 # Function to remove stopwords from a string
 def remove_stopwords(text):
     return " ".join(word for word in text.split() if word.lower() not in STOPWORDS)
 
+
 # Function to remove retweet symbols
 def remove_retweet_symbol(text):
     return re.sub(r"^RT\s+", "", text)
+
 
 # Function to lemmatize words in a string
 def lemmatize_text(text):
@@ -65,41 +71,37 @@ curr_dir = os.path.dirname(os.path.abspath(__file__))
 # Creates Folder path
 folder_path = os.path.join(curr_dir, folder_name)
 
-# Main dataset that will be worked with for training
 dataset_main = Dataset.from_dict({"Tweet": []})
 
 # Accumulate all unique tweets from all files
 all_unique_tweets = set()
 
 # Goes through each file in folder
-print(f'Looking for files in folder: {folder_path}')
-files = os.listdir(folder_path)
-
-# Ensure there are files in the directory
-if len(files) > 0:
-    first_file = files[0]  # Get the first file
-    print(f"First file found: {first_file}")
-    file_path = os.path.join(folder_path, first_file)
-
+for file in os.listdir(folder_path):
+    file_path = os.path.join(folder_path, file)
     # Does action to each file
-    if first_file.endswith(".csv"):
+    if file.endswith(".csv"):
         df = pd.read_csv(f"{file_path}", encoding="utf-8")
         dataset = Dataset.from_pandas(df)
         col_name = ""
         if "Tweet" in dataset.column_names:
             col_name = "Tweet"
+            
+            # Removes all columns but the Tweets
             raw_tweet_dataset = dataset.map(
                 lambda x: {col_name: x[col_name]},
                 remove_columns=[col for col in dataset.column_names if col != col_name],
             )
         else:
             col_name = "TextAsInput.MiT.LTR"
+            # Removes all columns but the Tweets
             raw_tweet_dataset = dataset.map(
                 lambda x: {col_name: x[col_name]},
                 remove_columns=[col for col in dataset.column_names if col != col_name],
             )
 
         unique_tweets = set(raw_tweet_dataset[col_name])
+
         # Add to the set of all unique tweets
         all_unique_tweets.update(unique_tweets)
 
@@ -125,8 +127,7 @@ for tweet in all_unique_tweets:
 for original, processed in original_and_processed:
     print(f"Original: {original}\nProcessed: {processed}\n")
 
+
 # Create the final dataset from the processed tweets if needed
 output_tweets = [processed for _, processed in original_and_processed]
 final_dataset = Dataset.from_dict({"Tweet": output_tweets})
-
-
