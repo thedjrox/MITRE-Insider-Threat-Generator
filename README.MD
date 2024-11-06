@@ -37,12 +37,12 @@ This project is a Python-based application that generates tweets simulating diff
 To generate tweets, run the program from the command line and specify the type of threat tweet you want to create.
 
   ```bash
-  python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
+  python generate_tweet.py --threat_type [medical|malicious|normal]
   ```
 
   Example:
   ```bash
-  python generate_tweet.py --threat_type medical --mode discreet
+  python generate_tweet.py --threat_type medical
   ```
 ### Configuration
 
