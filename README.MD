@@ -15,15 +15,15 @@ This project is a Python-based application that generates tweets simulating diff
 
 ### Prerequisites
 
-- Python 3.9 or later
+- Python 3.10 or later
 - Required Python packages (install with `pip install -r requirements.txt`)
 
 ### Installation
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/yourusername/insider-threat-tweet-generator.git
-   cd insider-threat-tweet-generator
+   git clone https://github.com/your_username/Data-Generator-Senior-Capstone.git
+   cd Data-Generator-Senior-Capstone
    ```
 2. **Install Dependencies**:
    ```bash
@@ -38,8 +38,10 @@ To generate tweets, run the program from the command line and specify the type o
 
   ```bash
   python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
-  
+  ```
+
   Example:
+  ```bash
   python generate_tweet.py --threat_type medical --mode discreet
   ```
 ### Configuration
