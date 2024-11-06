@@ -24,11 +24,11 @@ This project is a Python-based application that generates tweets simulating diff
    ```bash
    git clone https://github.com/yourusername/insider-threat-tweet-generator.git
    cd insider-threat-tweet-generator
-
+   ```
 2. **Install Dependencies**:
    ```bash
    pip install -r requirements.txt
-
+   ```
 3. **Download Model**:
    Ensure the pre-trained model is available locally. If using a custom model from Hugging Face or similar, specify the path or load it directly in the code.
 
@@ -38,10 +38,10 @@ To generate tweets, run the program from the command line and specify the type o
 
   ```bash
   python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
-
+  
   Example:
   python generate_tweet.py --threat_type medical --mode discreet
-
+  ```
 ### Configuration
 
 You can adjust model settings and generation parameters in the `config.py` file.
