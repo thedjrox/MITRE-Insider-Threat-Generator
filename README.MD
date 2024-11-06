@@ -40,7 +40,6 @@ To generate tweets, run the program from the command line and specify the type o
 python generate_tweet.py --threat_type [medical|malicious|normal] --mode [obvious|discreet]
 
 Example:
-```bash
 python generate_tweet.py --threat_type medical --mode discreet
 
 ### Configuration
