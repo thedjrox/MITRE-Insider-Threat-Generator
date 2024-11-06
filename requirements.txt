@@ -1,1 +1,4 @@
-
+pandas==2.0.3
+nltk==3.9.1
+emoji==2.14.0
+datasets==3.0.1
