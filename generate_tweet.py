@@ -33,11 +33,16 @@ parser.add_argument(
 args = parser.parse_args()
 
 tweet_object = {
-    "created_at": None,
-    "id": 0,
-    "id-str": "",
-    "text": "",
-    "user": {}
+    "created_at": None, #created_at
+    "id": 0, #tweet_id
+    "id-str": "", #tweet_id_str
+    "text": "", #tweet
+    "user": {
+        "id": 0 #user_id
+        "id-str": "" #user_id_str
+        "name": "", #screen_name
+        "screen_name": "" #screen_name
+    }
 }
 
 created_at = "" #GENERATE FROM AI MODEL
@@ -45,6 +50,8 @@ tweet_id = 0
 tweet_id_str = ""
 tweet = "" #GENERATE FROM AI MODEL
 type_tweet = args.threat_type
+user_id = 0
+user_id_str = ""
 screen_name = "" #GENERATE FROM AI MODEL
 
 if(args.time_or_single == "single"):
