@@ -1,6 +1,7 @@
 import argparse
 from transformers import pipeline
 import torch
+import random
 
 model_id = "meta-llama/Llama-3.2-3B-Instruct"
 
@@ -30,6 +31,13 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+created_at = "" #GENERATE FROM AI MODEL
+tweet_id = random_number = random.randint(0, 10000000)
+tweet_id_str = str(tweet_id)
+tweet = "" #GENERATE FROM AI MODEL
+type_tweet = args.threat_type
+screen_name = "" #GENERATE FROM AI MODEL
+
 
 pipe = pipeline(
     "text-generation",
@@ -39,7 +47,7 @@ pipe = pipeline(
 )
 
 prompt = f"Write a tweet that impersonates a {args.threat_type} insider threat."
-response = pipe(prompt, max_new_tokens=125)
+response = pipe(prompt, max_new_tokens=185)
 print(response[0]["generated_text"])
 
 
