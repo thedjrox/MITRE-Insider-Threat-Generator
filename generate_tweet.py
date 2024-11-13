@@ -31,6 +31,9 @@ parser.add_argument(
 )
 
 args = parser.parse_args()
+
+tweet_object = {}
+
 created_at = "" #GENERATE FROM AI MODEL
 tweet_id = random_number = random.randint(0, 10000000)
 tweet_id_str = str(tweet_id)
