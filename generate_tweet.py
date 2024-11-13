@@ -52,7 +52,8 @@ tweet = "" #GENERATE FROM AI MODEL
 type_tweet = args.threat_type
 user_id = 0
 user_id_str = ""
-screen_name = "" #GENERATE FROM AI MODEL
+name= "" #GENERATE FROM AI MODEL
+screen_name = "" #name without spaces
 
 if(args.time_or_single == "single"):
     i = 0
