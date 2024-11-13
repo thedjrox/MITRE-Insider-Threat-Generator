@@ -24,7 +24,7 @@ pipe = pipeline(
 )
 
 prompt = f"Write a tweet that impersonates a {args.threat_type} insider threat."
-response = pipe(prompt, max_new_tokens=256)
+response = pipe(prompt, max_new_tokens=125)
 print(response[0]["generated_text"])
 
 
