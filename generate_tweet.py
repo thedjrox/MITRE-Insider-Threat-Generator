@@ -25,7 +25,7 @@ parser.add_argument(
 parser.add_argument(
     "--time_or_single",
     type=str,
-    choices=["Time", "Single"],
+    choices=["time", "single"],
     required=True,
     help="Specify wether time series or single"
 )
@@ -35,13 +35,21 @@ args = parser.parse_args()
 tweet_object = {}
 
 created_at = "" #GENERATE FROM AI MODEL
-tweet_id = random_number = random.randint(0, 10000000)
-tweet_id_str = str(tweet_id)
+tweet_id = 0
+tweet_id_str = ""
 tweet = "" #GENERATE FROM AI MODEL
 type_tweet = args.threat_type
 screen_name = "" #GENERATE FROM AI MODEL
 
+if(args.time_or_single == "single"):
+    i = 0
+    while i < args.number_tweets:
+        tweet_id = random_number = random.randint(0, 10000000)
+        tweet_id_str = str(tweet_id)
+        #Generate created_at and Tweet in here for each tweet
 
+
+#This is how you generate stuff
 pipe = pipeline(
     "text-generation",
     model=model_id,
