@@ -32,7 +32,13 @@ parser.add_argument(
 
 args = parser.parse_args()
 
-tweet_object = {}
+tweet_object = {
+    "created_at": None,
+    "id": 0,
+    "id-str": "",
+    "text": "",
+    "user": {}
+}
 
 created_at = "" #GENERATE FROM AI MODEL
 tweet_id = 0
