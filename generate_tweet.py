@@ -14,6 +14,21 @@ parser.add_argument(
     help="Specify the type of threat: 'malicious', 'medical', or 'normal'."
 )
 
+parser.add_argument(
+    "--number_tweets",
+    type=int,
+    required=True,
+    help="Specify number of tweets to generate."
+)
+
+parser.add_argument(
+    "--time_or_single",
+    type=str,
+    choices=["Time", "Single"],
+    required=True,
+    help="Specify wether time series or single"
+)
+
 args = parser.parse_args()
 
 pipe = pipeline(
