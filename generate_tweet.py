@@ -5,6 +5,8 @@ import random
 import csv
 import json
 import uuid
+import pandas as pd
+
 
 model_id = "meta-llama/Llama-3.2-3B-Instruct"
 
@@ -60,6 +62,23 @@ name="" #GENERATE FROM AI MODEL
 screen_name = "" #name without spaces
 '''
 
+# Load scenarios from CSV file (assuming it's in the same directory as the script)
+csv_file = "Prompt Characteristics - Sheet1"
+df = pd.read_csv(csv_file, encoding = "utf-8")
+
+#Function to randomly select a scenario and characteristic based on threat type
+def select_scenario(threat_type):
+    if threat_type == "medical":
+        scenarios = df[["Scenario_Description", "Medical_Issue"]].dropna().values.tolist()
+    elif threat_type == "malicious":
+        scenarios = df[["Scenario_Description", "Malicious_Characteristics"]].dropna().values.tolist()
+    else:
+        return "a normal tweet."
+
+    selected_scenario = random.choice(scenarios)
+    return selected_scenario
+
+
 pipe = pipeline(
     "text-generation",
     model=model_id,
@@ -87,17 +106,22 @@ if(args.time_or_single == "single"):
         else:
             tweet_object["user"]["screen_name"] = tweet_object["user"]["name"]
 
-        prompt = f""
+        tweet_scenario = select_scenario(args.threat_type)
+        prompt = f"Only generate a tweet based of this scenario {tweet_scenario}"
         tweet = pipe(prompt, max_new_tokens=185)
 
         #APPEND DATA TO CSV FILE DOWN HERE
+        i += 1
 
         
 
+'''
+if args.threat_type != "normal":
+            scenario_desc, characteristic = select_scenario(args.threat_type)
+            prompt = f"Scenario: {scenario_desc}. Characteristic: {characteristic}. Write a tweet that impersonates a {args.threat_type} insider threat."
 
-
-prompt = f"Write a tweet that impersonates a {args.threat_type} insider threat."
-response = pipe(prompt, max_new_tokens=185)
-print(response[0]["generated_text"])
+        else:
+            prompt = "Generate a normal tweet."
+'''
 
 
