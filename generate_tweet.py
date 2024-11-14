@@ -110,18 +110,23 @@ if(args.time_or_single == "single"):
         prompt = f"Only generate a tweet based of this scenario {tweet_scenario}"
         tweet = pipe(prompt, max_new_tokens=185)
 
+        user_JSON = json.dumps(tweet_object["user"])
+        tweet_JSON = json.dumps(tweet_object)
         #APPEND DATA TO CSV FILE DOWN HERE
+        with open("generated_tweets.csv", mode="a", newline="") as file:
+            writer = csv.writer(file)
+            writer.writerow([
+                tweet_object["created_at"],
+                tweet_object["id"],
+                tweet_object["id_str"],
+                tweet_object["text"],
+                user_object
+                args.threat_type
+                tweet_JSON
+        ])
+
         i += 1
 
-        
-
-'''
-if args.threat_type != "normal":
-            scenario_desc, characteristic = select_scenario(args.threat_type)
-            prompt = f"Scenario: {scenario_desc}. Characteristic: {characteristic}. Write a tweet that impersonates a {args.threat_type} insider threat."
-
-        else:
-            prompt = "Generate a normal tweet."
-'''
+    
 
 
