@@ -120,9 +120,13 @@ if(args.time_or_single == "single"):
                 tweet_object["id"],
                 tweet_object["id_str"],
                 tweet_object["text"],
-                user_object
-                args.threat_type
-                tweet_JSON
+                user_object,
+                args.threat_type,
+                tweet_JSON,
+                tweet_object["user"]["id"],
+                tweet_object["user"]["id-str"],
+                tweet_object["user"]["name"],
+                tweet_object["user"]["screen_name"]
         ])
 
         i += 1
