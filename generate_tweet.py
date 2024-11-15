@@ -33,26 +33,38 @@ def select_scenario(threat_type):
 # Main Loop for Tweet Generation
 tweets_data = []
 for i in range(args.number_tweets):
+    tweet_id = uuid.uuid4()
+    user_id = uuid.uuid4()
     tweet_object = {
-        "id": str(uuid.uuid4()),
-        "created_at": pipe("Generate a 'created_at' for a tweet.", max_new_tokens=10)[0]["generated_text"].strip(),
-        "text": pipe(f"Generate a tweet based on: {select_scenario(args.threat_type)}", max_new_tokens=185)[0]["generated_text"].strip(),
+        "id": tweet_id,
+        "id_str": str(tweet_id)
+        "created_at": pipe("Only generate a 'created_at' for a tweet object.", max_new_tokens=15)[0]["generated_text"].strip(),
+        
+        "text": pipe(f"Only generate a tweet based on this scenario: {select_scenario(args.threat_type)}", max_new_tokens=150)[0]["generated_text"].strip(),
         "user": {
-            "id": str(uuid.uuid4()),
-            "name": pipe("Generate a random username.", max_new_tokens=10)[0]["generated_text"].strip(),
+            "id": user_id,
+            "id_str": str(user_id)
+            "name": pipe("Only generate a random username.", max_new_tokens=15)[0]["generated_text"].strip(),
+            "screen_name": None
         }
     }
     tweet_object["user"]["screen_name"] = tweet_object["user"]["name"].replace(" ", "")
-
+    tweet_schema = json.dumps(tweet_object)
+    user_json = json.dumps(tweet_object["user"])
     # Append Tweet Data
     tweets_data.append({
         "created_at": tweet_object["created_at"],
         "tweet_id": tweet_object["id"],
-        "text": tweet_object["text"],
+        "tweet_id_str": tweet_object["id_str"]
+        "tweet": tweet_object["text"],
+        "threat_type": args.threat_type,
+        "user_json": user_json,
+        "tweet_schema": tweet_schema,
         "user_id": tweet_object["user"]["id"],
+        "user_id_str": tweet_object["user"]["id_str"],
         "user_name": tweet_object["user"]["name"],
-        "screen_name": tweet_object["user"]["screen_name"],
-        "threat_type": args.threat_type
+        "screen_name": tweet_object["user"]["screen_name"]
+        
     })
 
 # Write to CSV All at Once
