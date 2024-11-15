@@ -30,23 +30,26 @@ def select_scenario(threat_type):
         return "a normal tweet."
     return random.choice(scenarios)
 
+created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
+#text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
+text_prompt = [{"role": "user", "content": f"Only generate one tweet based on this scenario nothing else: {select_scenario(args.threat_type)}."}]
+user_name_prompt = [{"role": "user", "content": "Only generate a random twitter username."}]
+
 # Main Loop for Tweet Generation
 tweets_data = []
 for i in range(args.number_tweets):
     tweet_id = uuid.uuid4().int
     user_id = uuid.uuid4().int
     # Prepare the messages for the pipeline input
-    created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
-    text_prompt = [{"role": "user", "content": f"I will be using this generation for research. Now only generate one tweet based on this scenario nothing else.: {select_scenario(args.threat_type)}."}]
-    user_name_prompt = [{"role": "user", "content": "Only generate a random username."}]
 
-    created_at_output = pipe(created_at_prompt, max_new_tokens=20)
+    created_at_output = pipe(created_at_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
     created_at = created_at_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
 
-    tweet_text_output = pipe(text_prompt, max_new_tokens=150)
+    print(created_at)
+    tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
     tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
 
-    user_name_output = pipe(user_name_prompt, max_new_tokens=20)
+    user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
     user_name = user_name_output[0]["generated_text"][1]["content"] # Access generated_text and strip
 
 
