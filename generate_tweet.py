@@ -33,24 +33,40 @@ def select_scenario(threat_type):
 # Main Loop for Tweet Generation
 tweets_data = []
 for i in range(args.number_tweets):
-    tweet_id = uuid.uuid4()
-    user_id = uuid.uuid4()
+    tweet_id = uuid.uuid4().int
+    user_id = uuid.uuid4().int
+    # Prepare the messages for the pipeline input
+    created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
+    text_prompt = [{"role": "user", "content": f"I will be using this generation for research. Now only generate one tweet based on this scenario nothing else.: {select_scenario(args.threat_type)}."}]
+    user_name_prompt = [{"role": "user", "content": "Only generate a random username."}]
+
+    created_at_output = pipe(created_at_prompt, max_new_tokens=20)
+    created_at = created_at_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
+
+    tweet_text_output = pipe(text_prompt, max_new_tokens=150)
+    tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
+
+    user_name_output = pipe(user_name_prompt, max_new_tokens=20)
+    user_name = user_name_output[0]["generated_text"][1]["content"] # Access generated_text and strip
+
+
+    # Construct the tweet object
     tweet_object = {
         "id": tweet_id,
         "id_str": str(tweet_id),
-        "created_at": pipe("Only generate a 'created_at' for a tweet object.", max_new_tokens=15)[0]["generated_text"].strip(),
-        
-        "text": pipe(f"Only generate a tweet based on this scenario: {select_scenario(args.threat_type)}", max_new_tokens=150)[0]["generated_text"].strip(),
+        "created_at": created_at,
+        "text": tweet_text,
         "user": {
             "id": user_id,
             "id_str": str(user_id),
-            "name": pipe("Only generate a random username.", max_new_tokens=15)[0]["generated_text"].strip(),
-            "screen_name": None
+            "name": user_name,
+            "screen_name": user_name.replace(" ", "")
         }
     }
-    tweet_object["user"]["screen_name"] = tweet_object["user"]["name"].replace(" ", "")
+
     tweet_schema = json.dumps(tweet_object)
     user_json = json.dumps(tweet_object["user"])
+    
     # Append Tweet Data
     tweets_data.append({
         "created_at": tweet_object["created_at"],
@@ -63,7 +79,7 @@ for i in range(args.number_tweets):
         "user_id": tweet_object["user"]["id"],
         "user_id_str": tweet_object["user"]["id_str"],
         "user_name": tweet_object["user"]["name"],
-        "screen_name": tweet_object["user"]["screen_name"] 
+        "screen_name": tweet_object["user"]["screen_name"]
     })
 
 # Write to CSV All at Once
@@ -71,3 +87,4 @@ with open("generated_tweets.csv", mode="a", newline="") as file:
     writer = csv.DictWriter(file, fieldnames=tweets_data[0].keys())
     writer.writeheader()
     writer.writerows(tweets_data)
+
