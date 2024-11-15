@@ -37,13 +37,13 @@ for i in range(args.number_tweets):
     user_id = uuid.uuid4()
     tweet_object = {
         "id": tweet_id,
-        "id_str": str(tweet_id)
+        "id_str": str(tweet_id),
         "created_at": pipe("Only generate a 'created_at' for a tweet object.", max_new_tokens=15)[0]["generated_text"].strip(),
         
         "text": pipe(f"Only generate a tweet based on this scenario: {select_scenario(args.threat_type)}", max_new_tokens=150)[0]["generated_text"].strip(),
         "user": {
             "id": user_id,
-            "id_str": str(user_id)
+            "id_str": str(user_id),
             "name": pipe("Only generate a random username.", max_new_tokens=15)[0]["generated_text"].strip(),
             "screen_name": None
         }
@@ -55,7 +55,7 @@ for i in range(args.number_tweets):
     tweets_data.append({
         "created_at": tweet_object["created_at"],
         "tweet_id": tweet_object["id"],
-        "tweet_id_str": tweet_object["id_str"]
+        "tweet_id_str": tweet_object["id_str"],
         "tweet": tweet_object["text"],
         "threat_type": args.threat_type,
         "user_json": user_json,
@@ -63,8 +63,7 @@ for i in range(args.number_tweets):
         "user_id": tweet_object["user"]["id"],
         "user_id_str": tweet_object["user"]["id_str"],
         "user_name": tweet_object["user"]["name"],
-        "screen_name": tweet_object["user"]["screen_name"]
-        
+        "screen_name": tweet_object["user"]["screen_name"] 
     })
 
 # Write to CSV All at Once
