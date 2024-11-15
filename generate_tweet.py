@@ -72,8 +72,3 @@ with open("generated_tweets.csv", mode="a", newline="") as file:
     writer = csv.DictWriter(file, fieldnames=tweets_data[0].keys())
     writer.writeheader()
     writer.writerows(tweets_data)
-
-
-    
-
-
