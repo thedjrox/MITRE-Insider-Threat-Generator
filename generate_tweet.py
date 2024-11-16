@@ -45,7 +45,6 @@ for i in range(args.number_tweets):
     created_at_output = pipe(created_at_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
     created_at = created_at_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
 
-    print(created_at)
     tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
     tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
 
