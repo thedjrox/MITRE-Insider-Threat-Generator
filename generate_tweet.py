@@ -6,6 +6,7 @@ import csv
 import json
 import uuid
 import pandas as pd
+from datetime import datetime, timedelta
 
 # Load Model and Setup Arguments
 model_id = "meta-llama/Llama-3.2-3B-Instruct"
@@ -30,59 +31,128 @@ def select_scenario(threat_type):
         return "a normal tweet."
     return random.choice(scenarios)
 
+def generate_iso_date(start_year=2010):
+    start_date = datetime(start_year, 1, 1) 
+    end_date = datetime.now()
+
+    random_days = random.randint(0, (end_date - start_date).days)
+    random_seconds = random.randint(0, 86399)
+    random_date = start_date + timedelta(days=random_days, seconds=random_seconds)
+
+    return random_date.isoformat() + "Z"
+
 created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
-#text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
+normal_text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
 text_prompt = [{"role": "user", "content": f"Only generate one tweet based on this scenario nothing else: {select_scenario(args.threat_type)}."}]
 user_name_prompt = [{"role": "user", "content": "Only generate a random twitter username."}]
 
 # Main Loop for Tweet Generation
 tweets_data = []
-for i in range(args.number_tweets):
-    tweet_id = uuid.uuid4().int
-    user_id = uuid.uuid4().int
-    # Prepare the messages for the pipeline input
+if args.time_or_single == "single":
+    for i in range(args.number_tweets):
+        tweet_id = uuid.uuid4().int
+        user_id = uuid.uuid4().int
+     
+        created_at = generate_iso_date()
+        if args.threat_type == "normal":
+            tweet_text_output = pipe(normal_text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+        else:
+            tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+        
+        tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
 
-    created_at_output = pipe(created_at_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
-    created_at = created_at_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
-
-    tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
-    tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  # Access generated_text and strip
-
-    user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
-    user_name = user_name_output[0]["generated_text"][1]["content"] # Access generated_text and strip
+        user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
+        user_name = user_name_output[0]["generated_text"][1]["content"]
 
 
-    # Construct the tweet object
-    tweet_object = {
-        "id": tweet_id,
-        "id_str": str(tweet_id),
-        "created_at": created_at,
-        "text": tweet_text,
-        "user": {
-            "id": user_id,
-            "id_str": str(user_id),
-            "name": user_name,
-            "screen_name": user_name.replace(" ", "")
+        # Construct the tweet object
+        tweet_object = {
+            "id": tweet_id,
+            "id_str": str(tweet_id),
+            "created_at": created_at,
+            "text": tweet_text,
+            "user": {
+                "id": user_id,
+                "id_str": str(user_id),
+                "name": user_name,
+                "screen_name": user_name.replace(" ", "")
+            }
         }
-    }
 
-    tweet_schema = json.dumps(tweet_object)
-    user_json = json.dumps(tweet_object["user"])
-    
-    # Append Tweet Data
-    tweets_data.append({
-        "created_at": tweet_object["created_at"],
-        "tweet_id": tweet_object["id"],
-        "tweet_id_str": tweet_object["id_str"],
-        "tweet": tweet_object["text"],
-        "threat_type": args.threat_type,
-        "user_json": user_json,
-        "tweet_schema": tweet_schema,
-        "user_id": tweet_object["user"]["id"],
-        "user_id_str": tweet_object["user"]["id_str"],
-        "user_name": tweet_object["user"]["name"],
-        "screen_name": tweet_object["user"]["screen_name"]
-    })
+        tweet_schema = json.dumps(tweet_object)
+        user_json = json.dumps(tweet_object["user"])
+        
+        # Append Tweet Data
+        tweets_data.append({
+            "created_at": tweet_object["created_at"],
+            "tweet_id": tweet_object["id"],
+            "tweet_id_str": tweet_object["id_str"],
+            "tweet": tweet_object["text"],
+            "threat_type": args.threat_type,
+            "user_json": user_json,
+            "tweet_schema": tweet_schema,
+            "user_id": tweet_object["user"]["id"],
+            "user_id_str": tweet_object["user"]["id_str"],
+            "user_name": tweet_object["user"]["name"],
+            "screen_name": tweet_object["user"]["screen_name"]
+        })
+else:
+    for i in range(args.number_tweets):
+        tweet_count = 0
+        tweet_id = uuid.uuid4().int
+        user_id = uuid.uuid4().int
+
+        user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
+        user_name = user_name_output[0]["generated_text"][1]["content"]
+        tweets_length = 5
+        for j in range(tweets_length):
+            #TODO: Increment by each iteration
+            created_at = generate_iso_date()
+            
+            #Regular tweets
+            if j % 2 != 0:
+                tweet_text_output = pipe(normal_text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+            #Questionable Tweet
+            elif j % 2 == 0 and j != tweets_length - 1:
+                #TODO: need semi bad prompt
+                tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+            #Insider Threat
+            elif j == tweets_length - 1:
+                tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+       
+            tweet_object = {
+                "id": tweet_id,
+                "id_str": str(tweet_id),
+                "created_at": created_at,
+                "text": tweet_text,
+                "user": {
+                    "id": user_id,
+                    "id_str": str(user_id),
+                    "name": user_name,
+                    "screen_name": user_name.replace(" ", "")
+                }
+            }
+
+            tweet_schema = json.dumps(tweet_object)
+            user_json = json.dumps(tweet_object["user"])
+            
+            # Append Tweet Data
+            tweets_data.append({
+                "created_at": tweet_object["created_at"],
+                "tweet_id": tweet_object["id"],
+                "tweet_id_str": tweet_object["id_str"],
+                "tweet": tweet_object["text"],
+                "threat_type": args.threat_type,
+                "user_json": user_json,
+                "tweet_schema": tweet_schema,
+                "user_id": tweet_object["user"]["id"],
+                "user_id_str": tweet_object["user"]["id_str"],
+                "user_name": tweet_object["user"]["name"],
+                "screen_name": tweet_object["user"]["screen_name"]
+            })
 
 # Write to CSV All at Once
 with open("generated_tweets.csv", mode="a", newline="") as file:
