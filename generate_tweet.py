@@ -17,7 +17,8 @@ parser.add_argument("--time_or_single", type=str, choices=["time", "single"], re
 args = parser.parse_args()
 
 # Setup Scenario Data and Pipeline
-csv_file = "Prompt Characteristics - Sheet1.csv"
+#csv_file = "Prompt Characteristics - Sheet1.csv"
+csv_file = "Time Series Scenarios - Sheet1.csv"
 df = pd.read_csv(csv_file, encoding="utf-8")
 pipe = pipeline("text-generation", model=model_id, device="cpu", torch_dtype=torch.float32)
 
@@ -30,6 +31,29 @@ def select_scenario(threat_type):
     else:
         return "a normal tweet."
     return random.choice(scenarios)
+
+def select_scenario_time_series(threat_type):   
+    # Check if the threat_type is valid
+    if threat_type not in ['medical', 'malicious']:
+        raise ValueError("Invalid threat type. Please choose 'medical' or 'malicious'.")
+    
+    # Select the first three columns (Stage_1_Normal, Stage_2_Questionable, Stage_3_Normal)
+    selected_columns = df[['Stage_1_Normal', 'Stage_2_Questionable', 'Stage_3_Normal']]
+    
+    # Depending on the threat type, select the appropriate column (Stage_4_Medical or Stage_4_Malicious)
+    if threat_type == "medical":
+        threat_column = df['Stage_4_Medical']
+    else:
+        threat_column = df['Stage_4_Malicious']
+    
+    # Combine the selected columns and threat column into a new DataFrame
+    combined_df = selected_columns.copy()
+    combined_df['threat'] = threat_column
+    
+    #pick a random row
+    random_row = combined_df.sample(n=1).iloc[0]
+    
+    return random_row
 
 def generate_iso_date(start_year=2010):
     start_date = datetime(start_year, 1, 1) 
@@ -104,25 +128,15 @@ else:
 
         user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
         user_name = user_name_output[0]["generated_text"][1]["content"]
-        tweets_length = 5
+        tweets_length = 4
         for j in range(tweets_length):
             #TODO: Increment by each iteration
             created_at = generate_iso_date()
             
-            #Regular tweets
-            if j % 2 != 0:
-                tweet_text_output = pipe(normal_text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
-                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
-            #Questionable Tweet
-            elif j % 2 == 0 and j != tweets_length - 1:
-                #TODO: need semi bad prompt
-                tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
-                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
-            #Insider Threat
-            elif j == tweets_length - 1:
-                tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
-                tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
-       
+            scenario = select_scenario_time_series(args.threat_type)
+            tweet_text_output = pipe(scenario.iloc[j], max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+            tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+            
             tweet_object = {
                 "id": tweet_id,
                 "id_str": str(tweet_id),
@@ -155,7 +169,7 @@ else:
             })
 
 # Write to CSV All at Once
-with open("generated_tweets.csv", mode="a", newline="") as file:
+with open("generated_tweets_time_series.csv", mode="a", newline="") as file:
     writer = csv.DictWriter(file, fieldnames=tweets_data[0].keys())
     writer.writeheader()
     writer.writerows(tweets_data)
