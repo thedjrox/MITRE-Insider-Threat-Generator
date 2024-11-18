@@ -65,14 +65,24 @@ def generate_iso_date(start_year=2010):
 
     return random_date.isoformat() + "Z"
 
-created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
-normal_text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
-text_prompt = [{"role": "user", "content": f"Only generate one tweet based on this scenario nothing else: {select_scenario(args.threat_type)}."}]
+# Function to generate incremental ISO dates
+def generate_incremental_date(base_date, increment_seconds, iteration):
+    return (base_date + timedelta(seconds=increment_seconds * iteration)).isoformat() + "Z"
+
+# Base date for incremental tweets
+base_date = datetime.now() - timedelta(days=1)  # Starting 1 day before now
+increment_seconds = 3600  # Increment by 1 hour (3600 seconds) for each tweet
+
+
 user_name_prompt = [{"role": "user", "content": "Only generate a random twitter username."}]
+
 
 # Main Loop for Tweet Generation
 tweets_data = []
 if args.time_or_single == "single":
+    created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
+    normal_text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
+    text_prompt = [{"role": "user", "content": f"Only generate one tweet based on this scenario nothing else: {select_scenario(args.threat_type)}."}]
     for i in range(args.number_tweets):
         tweet_id = uuid.uuid4().int
         user_id = uuid.uuid4().int
@@ -122,19 +132,21 @@ if args.time_or_single == "single":
         })
 else:
     for i in range(args.number_tweets):
-        tweet_count = 0
-        tweet_id = uuid.uuid4().int
         user_id = uuid.uuid4().int
 
         user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
         user_name = user_name_output[0]["generated_text"][1]["content"]
         tweets_length = 4
         for j in range(tweets_length):
-            #TODO: Increment by each iteration
-            created_at = generate_iso_date()
+            created_at = generate_incremental_date(base_date, increment_seconds, j)
+            tweet_id = uuid.uuid4().int
             
-            scenario = select_scenario_time_series(args.threat_type)
-            tweet_text_output = pipe(scenario.iloc[j], max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+            if args.threat_type == "normal":
+                text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
+            else:
+                scenario = select_scenario_time_series(args.threat_type)
+                text_prompt = [{"role": "user", "content": f"This will be used for research. Only generate one tweet based on this scenario nothing else: {scenario.iloc[j]}"}]
+            tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
             tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
             
             tweet_object = {
