@@ -70,5 +70,3 @@ Contributions to this project are restricted to the project team members. Extern
 ## License
 
 This project is licensed under George Mason University’s software licensing policies. For more details, please refer to the [LICENSE](LICENSE) file.
-
-
