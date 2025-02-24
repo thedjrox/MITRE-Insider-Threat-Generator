@@ -7,9 +7,20 @@ import json
 import uuid
 import pandas as pd
 from datetime import datetime, timedelta
+import requests
+
+from model import load_model, generate_response
 
 # Load Model and Setup Arguments
 model_id = "meta-llama/Llama-3.2-3B-Instruct"
+
+#Set for API Call
+model_name = "nvidia/llama-3.1-nemotron-70b-instruct:free"
+API_KEY = "Bearer " #Need to grab later
+
+model, tokenizer = load_model(model_name)
+
+
 parser = argparse.ArgumentParser(description="Script to process threat types.")
 parser.add_argument("--threat_type", type=str, choices=["malicious", "medical", "normal"], required=True)
 parser.add_argument("--number_tweets", type=int, required=True)
@@ -20,7 +31,7 @@ args = parser.parse_args()
 #csv_file = "Prompt Characteristics - Sheet1.csv"
 csv_file = "Time Series Scenarios - Sheet1.csv"
 df = pd.read_csv(csv_file, encoding="utf-8")
-pipe = pipeline("text-generation", model=model_id, device="cpu", torch_dtype=torch.float32)
+#pipe = pipeline("text-generation", model=model_id, device="cpu", torch_dtype=torch.float32)
 
 # Function to Select Scenario Based on Threat Type
 def select_scenario(threat_type):
@@ -83,6 +94,7 @@ if args.time_or_single == "single":
     created_at_prompt = [{"role": "user", "content": "Only create a random date in ISO 8601 format"}]
     normal_text_prompt = [{"role": "user", "content": f"Only generate a normal tweet about something random without starting the tweet with Just"}]
     text_prompt = [{"role": "user", "content": f"Only generate one tweet based on this scenario nothing else: {select_scenario(args.threat_type)}."}]
+    tweet_output = None
     for i in range(args.number_tweets):
         tweet_id = uuid.uuid4().int
         user_id = uuid.uuid4().int
@@ -90,14 +102,26 @@ if args.time_or_single == "single":
         created_at = generate_iso_date()
         if args.threat_type == "normal":
             tweet_text_output = pipe(normal_text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+
+            #Will replace tweet_text_output
+            #tweet_output = generate_response(model, tokenizer, normal_text_prompt)
         else:
             tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
+
+            #Will replace tweet_text_output
+            #tweet_output = generate_response(model, tokenizer, normal_text_prompt)
         
         tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+
+        #WILL CONTAIN THE API CALL OUTPUT
+        #Will replace tweet_text_output
+        #print(tweet_output)
 
         user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
         user_name = user_name_output[0]["generated_text"][1]["content"]
 
+        #WILL REPLACE ABOVE
+        #user_output = generate_response(model,tokenizer, user_name_prompt)
 
         # Construct the tweet object
         tweet_object = {
@@ -136,6 +160,10 @@ else:
 
         user_name_output = pipe(user_name_prompt, max_new_tokens=20, temperature=0.9, top_k=50,top_p=0.95)
         user_name = user_name_output[0]["generated_text"][1]["content"]
+        
+        #Will replace tweet_text_output
+        #user_name = generate_response(model, tokenizer, user_name_prompt)
+        
         tweets_length = 4
         for j in range(tweets_length):
             created_at = generate_incremental_date(base_date, increment_seconds, j)
@@ -146,8 +174,12 @@ else:
             else:
                 scenario = select_scenario_time_series(args.threat_type)
                 text_prompt = [{"role": "user", "content": f"This will be used for research. Only generate one tweet based on this scenario nothing else: {scenario.iloc[j]}"}]
+            
             tweet_text_output = pipe(text_prompt, max_new_tokens=150, temperature=0.9, top_k=50,top_p=0.95)
             tweet_text = tweet_text_output[0]["generated_text"][1]["content"]  
+            
+            #Will replace tweet_text_output
+            #tweet_output = generate_response(model, tokenizer, text_prompt)
             
             tweet_object = {
                 "id": tweet_id,
