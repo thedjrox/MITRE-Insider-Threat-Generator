@@ -1,6 +1,18 @@
 import tkinter as tk
 from tkinter import ttk
+from backend import generate_tweets  # Import the back-end function
 
+def on_generate():
+    # Collect user inputs from the GUI
+    destination = dest_input.get()
+    num_tweets = int(num_tweets_input.get())
+    generation_type = time_or_single_option.get()
+    selected_threat_types = [listbox.get(i) for i in listbox.curselection()]
+
+    # Call the back-end function with the collected inputs
+    generate_tweets(destination, num_tweets, generation_type, selected_threat_types)
+
+# GUI Setup
 root = tk.Tk()
 root.title("Data Generator Insider Threats")
 root.geometry("530x500")
@@ -38,7 +50,7 @@ for idx, element in enumerate(insider_threat_types):
 listbox.grid(row=9, column=0, padx=10, pady=5, sticky="w")
 
 # Generate Button
-button = ttk.Button(root, text="Generate", width=82)
+button = ttk.Button(root, text="Generate", width=82, command=on_generate)
 button.grid(row=10, column=0, padx=10, pady=10, sticky="w")
 
 root.mainloop()
