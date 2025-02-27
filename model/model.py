@@ -1,17 +1,30 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
+import requests
+import json
 
-def load_model(model_name):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    return model, tokenizer
-
-
-def generate_response(model, tokenizer, message):
-    prompt = str(message)
-
-    inputs = tokenizer(prompt, return_tensors="pt")
-    
-    outputs = model.generate(inputs['input_ids'], max_length=200, num_return_sequences=1)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    
-    return response
+def generate_response(prompt):
+    response = requests.post(
+        url="https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": "Bearer ",
+            "Content-Type": "application/json",
+        },
+        data=json.dumps({
+            "model": "nvidia/llama-3.1-nemotron-70b-instruct:free",
+            "messages": [
+            {
+                "role": "user",
+                "content": prompt
+            }
+            ],
+            
+        })
+    )
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the JSON response
+        result = response.json()
+        # Extract the model's output
+        model_output = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+        return model_output
+    else:
+        print(f"Error: {response.status_code}")
