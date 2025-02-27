@@ -1,6 +1,7 @@
 import csv, json, uuid, pandas as pd, sys, os, random
 from datetime import datetime, timedelta
 
+#Allows us to grab model module from sibling directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from model import generate_response
@@ -50,6 +51,17 @@ def select_scenario_time_series(threat_type):
     random_row = combined_df.sample(n=1).iloc[0]
     
     return random_row
+
+
+def generate_timeseries_tweets(dest, num_tweets,threat_types):
+    tweets = []
+    for threat_type in threat_types:
+        for _ in range(num_tweets):
+            tweet_id = uuid.uuid4().int
+            tweet_id = uuid.uuid4().int
+            tweet_id = generate_iso_date()
+
+    
 
 
 def generate_tweets(dest, num_tweets, threat_types):
