@@ -27,7 +27,7 @@ def on_generate(destination):
 # GUI Setup
 root = tk.Tk()
 root.title("Data Generator Insider Threats")
-root.geometry("530x500")
+root.geometry("600x500")
 root.resizable(False, False)
 
 insider_threat_types = ["Malicious", "Medical", "Normal"]
@@ -38,8 +38,8 @@ ttk.Label(root, text="Configure your tweet generation parameters", font=("Helvet
 
 # Destination input field
 ttk.Label(root, text="Destination").grid(row=2, column=0, pady=5, padx=10, sticky="w")
-dest_input = tk.Entry(root, width=10)
-dest_input.grid(row=3, column=0, pady=5, padx=10, sticky="ew")
+dest_input = tk.Entry(root)
+dest_input.grid(row=3, column=0, pady=5, padx=10, sticky="we")
 
 browse_button = ttk.Button(root, text="Browse", command=browse_file)
 browse_button.grid(row=3, column=1)
