@@ -1,8 +1,9 @@
 import csv, json, uuid, pandas as pd, sys, os, random
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 #Allows us to grab model module from sibling directory
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../model')))
 
 from model import generate_response
 
@@ -15,9 +16,26 @@ def generate_iso_date():
     # Format the date similar to "Wed Oct 10 20:19:24 +0000 2018"
     return random_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
 
+def generate_iso_date_increment(prev_date):
+    original_date = datetime.strptime(prev_date, "%a %b %d %H:%M:%S +0000 %Y")
+    
+    # Generate random increments for days (1-30) and months (1-12)
+    random_days = random.randint(1, 30)
+    random_months = random.randint(1, 12)
+
+    # Increment the date
+    new_date = original_date + relativedelta(months=random_months) + timedelta(days=random_days)
+
+    # Ensure it stays within the same year
+    if new_date.year > original_date.year:
+        new_date = new_date.replace(year=original_date.year)
+
+    # Return the new formatted date
+    return new_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
+
 def select_scenario(threat_type):
     csv_file_name = "Prompt Characteristics - Sheet1.csv"
-    df = pd.read_csv(csv_file_name, encodeing="utf-8")
+    df = pd.read_csv(csv_file_name, encoding="utf-8")
     
     if threat_type == "medical":
         scenarios = df[["Scenario_Description", "Medical_Issue"]].dropna().values.tolist()
@@ -55,11 +73,59 @@ def select_scenario_time_series(threat_type):
 
 def generate_timeseries_tweets(dest, num_tweets,threat_types):
     tweets = []
-    for threat_type in threat_types:
-        for _ in range(num_tweets):
-            tweet_id = uuid.uuid4().int
-            tweet_id = uuid.uuid4().int
-            tweet_id = generate_iso_date()
+
+    if threat_type.lower() == "normal":
+        prompt = "Only generate a normal tweet about something random"
+    else:
+        for threat_type in threat_types:
+            for i in range(num_tweets):
+                    tweet_id = uuid.uuid4().int
+                    user_id = uuid.uuid4().int
+                    for i in range(4):
+                        if(i == 0):
+                            created_at = generate_iso_date()
+                        else:
+                            created_at = generate_iso_date_increment(tweets[i-1]["created_at"])
+                        if threat_type.lower() == "normal":
+                            prompt = "Only generate a normal tweet about something random"
+                        else:
+                            scenario = select_scenario_time_series(threat_type.lower())
+                            prompt = f"Only generate one tweet based on this scenario nothing else: {scenario.iloc[i]}."
+
+                        tweet_response = generate_response(prompt)
+                        username_response = generate_response("Only generate a random twitter username")
+
+                        tweet_object = {
+                            "id": tweet_id,
+                            "id_str": str(tweet_id),
+                            "created_at": created_at,
+                            "text": tweet_response,
+                            "user": {
+                                "id": user_id,
+                                "id_str": str(user_id),
+                                "name": username_response,
+                                "screen_name": username_response.replace(" ", "")
+                            }
+                        }
+
+                        tweets.append({
+                            "created_at": tweet_object["created_at"],
+                            "tweet_id": tweet_object["id"],
+                            "tweet_id_str": tweet_object["id_str"],
+                            "tweet": tweet_object["text"],
+                            "threat_type": threat_type,
+                            "user_json": json.dumps(tweet_object["user"]),
+                            "tweet_schema": json.dumps(tweet_object),
+                            "user_id": tweet_object["user"]["id"],
+                            "user_id_str": tweet_object["user"]["id_str"],
+                            "user_name": tweet_object["user"]["name"],
+                            "screen_name": tweet_object["user"]["screen_name"]
+                        })
+
+                        with open(dest, mode="a", newline="") as file:
+                            writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
+                            writer.writeheader()
+                            writer.writerows(tweets)
 
     
 
