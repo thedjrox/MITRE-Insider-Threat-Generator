@@ -47,7 +47,7 @@ def select_scenario(threat_type):
 
 def select_scenario_time_series(threat_type):   
     csv_file_name = "Time Series Scenarios - Sheet1.csv"
-    df = pd.read_csv(csv_file_name, encodeing="utf-8")
+    df = pd.read_csv(csv_file_name, encoding="utf-8")
     # Check if the threat_type is valid
     if threat_type not in ['medical', 'malicious']:
         raise ValueError("Invalid threat type. Please choose 'medical' or 'malicious'.")
@@ -73,60 +73,60 @@ def select_scenario_time_series(threat_type):
 
 def generate_timeseries_tweets(dest, num_tweets,threat_types):
     tweets = []
-
-    if threat_type.lower() == "normal":
-        prompt = "Only generate a normal tweet about something random"
-    else:
-        for threat_type in threat_types:
+    for threat_type in threat_types:
+        if threat_type.lower() == "normal":
+            prompt = "Only generate a normal tweet about something random"
+        else:
             for i in range(num_tweets):
-                    tweet_id = uuid.uuid4().int
-                    user_id = uuid.uuid4().int
-                    for i in range(4):
-                        if(i == 0):
-                            created_at = generate_iso_date()
-                        else:
-                            created_at = generate_iso_date_increment(tweets[i-1]["created_at"])
-                        if threat_type.lower() == "normal":
-                            prompt = "Only generate a normal tweet about something random"
-                        else:
-                            scenario = select_scenario_time_series(threat_type.lower())
-                            prompt = f"Only generate one tweet based on this scenario nothing else: {scenario.iloc[i]}."
+                tweet_id = uuid.uuid4().int
+                user_id = uuid.uuid4().int
+                for i in range(4):
+                    if(i == 0):
+                        created_at = generate_iso_date()
+                    else:
+                        created_at = generate_iso_date_increment(tweets[i-1]["created_at"])
+                    if threat_type.lower() == "normal":
+                        prompt = "Only generate a normal tweet about something random"
+                    else:
+                        scenario = select_scenario_time_series(threat_type.lower())
+                        prompt = f"Only generate one tweet based on this scenario nothing else: {scenario.iloc[i]}."
 
-                        tweet_response = generate_response(prompt)
-                        username_response = generate_response("Only generate a random twitter username")
+                    tweet_response = generate_response(prompt)
+                    username_response = generate_response("Only generate a random twitter username")
 
-                        tweet_object = {
-                            "id": tweet_id,
-                            "id_str": str(tweet_id),
-                            "created_at": created_at,
-                            "text": tweet_response,
-                            "user": {
-                                "id": user_id,
-                                "id_str": str(user_id),
-                                "name": username_response,
-                                "screen_name": username_response.replace(" ", "")
-                            }
+                    tweet_object = {
+                        "id": tweet_id,
+                        "id_str": str(tweet_id),
+                        "created_at": created_at,
+                        "text": tweet_response,
+                        "user": {
+                            "id": user_id,
+                            "id_str": str(user_id),
+                            "name": username_response,
+                            "screen_name": username_response.replace(" ", "")
                         }
+                    }
 
-                        tweets.append({
-                            "created_at": tweet_object["created_at"],
-                            "tweet_id": tweet_object["id"],
-                            "tweet_id_str": tweet_object["id_str"],
-                            "tweet": tweet_object["text"],
-                            "threat_type": threat_type,
-                            "user_json": json.dumps(tweet_object["user"]),
-                            "tweet_schema": json.dumps(tweet_object),
-                            "user_id": tweet_object["user"]["id"],
-                            "user_id_str": tweet_object["user"]["id_str"],
-                            "user_name": tweet_object["user"]["name"],
-                            "screen_name": tweet_object["user"]["screen_name"]
-                        })
+                    tweets.append({
+                        "created_at": tweet_object["created_at"],
+                        "tweet_id": tweet_object["id"],
+                        "tweet_id_str": tweet_object["id_str"],
+                        "tweet": tweet_object["text"],
+                        "threat_type": threat_type,
+                        "user_json": json.dumps(tweet_object["user"]),
+                        "tweet_schema": json.dumps(tweet_object),
+                        "user_id": tweet_object["user"]["id"],
+                        "user_id_str": tweet_object["user"]["id_str"],
+                        "user_name": tweet_object["user"]["name"],
+                        "screen_name": tweet_object["user"]["screen_name"]
+                    })
 
-                        with open(dest, mode="a", newline="") as file:
-                            writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
-                            writer.writeheader()
-                            writer.writerows(tweets)
-
+                    with open(dest, mode="a", newline="") as file:
+                        writer = csv.DictWriter(file, fieldnames=tweets[i].keys())
+                        if(i == 0):
+                            writer.writeheader()    
+                        writer.writerows(tweets)
+    return 1
     
 
 
@@ -178,4 +178,4 @@ def generate_tweets(dest, num_tweets, threat_types):
                 writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
                 writer.writeheader()
                 writer.writerows(tweets)
-
+    return 1

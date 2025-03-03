@@ -28,3 +28,4 @@ def generate_response(prompt):
         return model_output
     else:
         print(f"Error: {response.status_code}")
+        return None

@@ -13,6 +13,8 @@ def browse_file():
 
 def on_generate(destination):
     # Collect user inputs from the GUI
+    button.config(state="disabled", text="Generating Tweets...")
+    print("Generating Tweets")
     destination = dest_input.get()
     num_tweets = int(num_tweets_input.get())
     generation_type = time_or_single_option.get()
@@ -20,9 +22,12 @@ def on_generate(destination):
 
     # Call the back-end function with the collected inputs
     if(generation_type == "Single"):
-        generate_tweets(destination, num_tweets, selected_threat_types)  
+        res = generate_tweets(destination, num_tweets, selected_threat_types)  
     else:
-        generate_timeseries_tweets(destination, num_tweets, selected_threat_types)
+        res = generate_timeseries_tweets(destination, num_tweets, selected_threat_types)
+    
+    print("Done generating")
+    button.config(state="normal", text="Generate")
 
 # GUI Setup
 root = tk.Tk()
@@ -65,7 +70,7 @@ for idx, element in enumerate(insider_threat_types):
 listbox.grid(row=9, column=0, padx=10, pady=5, sticky="w")
 
 # Generate Button
-button = ttk.Button(root, text="Generate", width=82, command=lambda: on_generate(dest_input.get()))
+button = ttk.Button(root, text="Generate", width=82,  command=lambda: on_generate(dest_input.get()))
 button.grid(row=10, column=0, padx=10, pady=10, sticky="w")
 
 root.mainloop()
