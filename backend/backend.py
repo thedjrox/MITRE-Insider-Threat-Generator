@@ -17,18 +17,18 @@ def generate_iso_date():
     return random_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
 
 def generate_iso_date_increment(prev_date):
+    # Parse the previous date
     original_date = datetime.strptime(prev_date, "%a %b %d %H:%M:%S +0000 %Y")
     
     # Generate random increments for days (1-30) and months (1-12)
     random_days = random.randint(1, 30)
     random_months = random.randint(1, 12)
 
-    # Increment the date
-    new_date = original_date + relativedelta(months=random_months) + timedelta(days=random_days)
-
-    # Ensure it stays within the same year
-    if new_date.year > original_date.year:
-        new_date = new_date.replace(year=original_date.year)
+    # Increment the date by months first
+    new_date = original_date + relativedelta(months=random_months)
+    
+    # Then, increment the date by days
+    new_date = new_date + timedelta(days=random_days)
 
     # Return the new formatted date
     return new_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
