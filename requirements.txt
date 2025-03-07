@@ -4,3 +4,4 @@ pip install bitsandbytes -cuda117
 pip install -U bitsandbytes
 pip install accelerate
 pip install pandas
+pip install python-dotenv

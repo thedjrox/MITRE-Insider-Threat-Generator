@@ -33,7 +33,7 @@ def on_generate():
 root = tk.Tk()
 root.title("Data Generator Insider Threats")
 root.geometry("600x500")
-root.resizable(False, False)
+#root.resizable(False, False)
 
 insider_threat_types = ["Malicious", "Medical", "Normal"]
 

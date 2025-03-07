@@ -6,11 +6,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
+print(API_KEY)
 def generate_response(prompt):
     response = requests.post(
         url="https://openrouter.ai/api/v1/chat/completions",
         headers={
-            "Authorization": f"Bearer {API_KEY}",
+            "Authorization": "Bearer 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",
             "Content-Type": "application/json",
         },
         data=json.dumps({

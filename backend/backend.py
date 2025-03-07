@@ -11,8 +11,12 @@ from model import generate_response
 def has_header(csv_file):
     with open(csv_file, 'r', newline='', encoding='utf-8') as f:
         reader = csv.reader(f)
-        first_row = next(reader)
-        return any(not cell.replace('.', '', 1).isdigit() for cell in first_row)
+        try:
+            first_row = next(reader)
+            return not any(first_row)
+        except StopIteration:
+            return True
+        
 
 def generate_iso_date():
     # Generate a random date in the past 5 years
@@ -110,7 +114,7 @@ def generate_timeseries_tweets(dest, num_tweets,threat_types):
                             "id": user_id,
                             "id_str": str(user_id),
                             "name": username_response,
-                            "screen_name": username_response.replace(" ", "")
+                            "screen_name": str(username_response.replace(" ", ""))
                         }
                     }
 
@@ -155,6 +159,8 @@ def generate_tweets(dest, num_tweets, threat_types):
             tweet_response = generate_response(prompt)
             username_response = generate_response("Only generate a random twitter username")
 
+            print(username_response)
+
             tweet_object = {
                 "id": tweet_id,
                 "id_str": str(tweet_id),
@@ -164,7 +170,7 @@ def generate_tweets(dest, num_tweets, threat_types):
                     "id": user_id,
                     "id_str": str(user_id),
                     "name": username_response,
-                    "screen_name": username_response.replace(" ", "")
+                    "screen_name": str(username_response.replace(" ", ""))
                 }
             }
 
