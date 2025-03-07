@@ -1,4 +1,5 @@
 import csv, json, uuid, pandas as pd, sys, os, random
+
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
@@ -6,6 +7,12 @@ from dateutil.relativedelta import relativedelta
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../model')))
 
 from model import generate_response
+
+def has_header(csv_file):
+    with open(csv_file, 'r', newline='', encoding='utf-8') as f:
+        reader = csv.reader(f)
+        first_row = next(reader)
+        return any(not cell.replace('.', '', 1).isdigit() for cell in first_row)
 
 def generate_iso_date():
     # Generate a random date in the past 5 years
@@ -123,8 +130,9 @@ def generate_timeseries_tweets(dest, num_tweets,threat_types):
 
                     with open(dest, mode="a", newline="") as file:
                         writer = csv.DictWriter(file, fieldnames=tweets[i].keys())
-                        if(i == 0):
+                        if has_header(dest):
                             writer.writeheader()    
+                        
                         writer.writerows(tweets)
     return 1
     
@@ -133,7 +141,7 @@ def generate_timeseries_tweets(dest, num_tweets,threat_types):
 def generate_tweets(dest, num_tweets, threat_types):
     tweets = []
     for threat_type in threat_types:
-        for _ in range(num_tweets):
+        for i in range(num_tweets):
             tweet_id = uuid.uuid4().int
             user_id = uuid.uuid4().int
             created_at = generate_iso_date()
@@ -175,7 +183,8 @@ def generate_tweets(dest, num_tweets, threat_types):
             })
 
             with open(dest, mode="a", newline="") as file:
-                writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
-                writer.writeheader()
+                writer = csv.DictWriter(file, fieldnames=tweets[i].keys())
+                if has_header(dest):
+                    writer.writeheader()       
                 writer.writerows(tweets)
     return 1

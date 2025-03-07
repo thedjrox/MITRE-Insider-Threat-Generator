@@ -11,7 +11,7 @@ def browse_file():
         dest_input.delete(0, tk.END) 
         dest_input.insert(0, filename) 
 
-def on_generate(destination):
+def on_generate():
     # Collect user inputs from the GUI
     button.config(state="disabled", text="Generating Tweets...")
     print("Generating Tweets")
@@ -70,7 +70,7 @@ for idx, element in enumerate(insider_threat_types):
 listbox.grid(row=9, column=0, padx=10, pady=5, sticky="w")
 
 # Generate Button
-button = ttk.Button(root, text="Generate", width=82,  command=lambda: on_generate(dest_input.get()))
+button = ttk.Button(root, text="Generate", width=82,  command=lambda: on_generate())
 button.grid(row=10, column=0, padx=10, pady=10, sticky="w")
 
 root.mainloop()
