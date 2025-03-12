@@ -1,11 +1,9 @@
 import csv, json, uuid, pandas as pd, sys, os, random
-
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-#Allows us to grab model module from sibling directory
+# Allows us to grab model module from sibling directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../model')))
-
 from model import generate_response
 
 def has_header(csv_file):
@@ -16,133 +14,52 @@ def has_header(csv_file):
             return not any(first_row)
         except StopIteration:
             return True
-        
 
 def generate_iso_date():
-    # Generate a random date in the past 5 years
     random_days = random.randint(0, 365 * 5)
     random_time = timedelta(days=random_days)
     random_date = datetime.now() - random_time
-    
-    # Format the date similar to "Wed Oct 10 20:19:24 +0000 2018"
     return random_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
 
 def generate_iso_date_increment(prev_date):
-    # Parse the previous date
     original_date = datetime.strptime(prev_date, "%a %b %d %H:%M:%S +0000 %Y")
-    
-    # Generate random increments for days (1-30) and months (1-12)
     random_days = random.randint(1, 30)
     random_months = random.randint(1, 12)
-
-    # Increment the date by months first
-    new_date = original_date + relativedelta(months=random_months)
-    
-    # Then, increment the date by days
-    new_date = new_date + timedelta(days=random_days)
-
-    # Return the new formatted date
+    new_date = original_date + relativedelta(months=random_months) + timedelta(days=random_days)
     return new_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
 
-def select_scenario(threat_type):
-    csv_file_name = "Prompt Characteristics - Sheet1.csv"
-    df = pd.read_csv(csv_file_name, encoding="utf-8")
+def load_csv_data(file_name):
+    df = pd.read_csv(file_name, header=None, encoding="utf-8")
+    return df[0].tolist()
+
+def build_prompt(threat_type, prompts, profiles, tones, malicious_scenarios, medical_scenarios):
+    prompt_dict = dict(zip(prompts[0::2], prompts[1::2]))
     
-    if threat_type == "medical":
-        scenarios = df[["Scenario_Description", "Medical_Issue"]].dropna().values.tolist()
-    elif threat_type == "malicious":
-        scenarios = df[["Scenario_Description", "Malicious_Characteristics"]].dropna().values.tolist()
+    if threat_type.lower() == "normal":
+        return prompt_dict["Normal"]
+    
+    profile = random.choice(profiles)
+    tone = random.choice(tones)
+    
+    if threat_type.lower() == "malicious":
+        scenario = random.choice(malicious_scenarios)
+        prompt = prompt_dict["Malicious"] + f"\n- Scenario: {scenario}\n- Character Profile: {profile}\n- Desired Tone: {tone}"
+    elif threat_type.lower() == "medical":
+        scenario = random.choice(medical_scenarios)
+        prompt = prompt_dict["Medical"] + f"\n- Scenario: {scenario}\n- Character Profile: {profile}\n- Desired Tone: {tone}"
     else:
-        return "a normal tweet."
-    return random.choice(scenarios)
-
-def select_scenario_time_series(threat_type):   
-    csv_file_name = "Time Series Scenarios - Sheet1.csv"
-    df = pd.read_csv(csv_file_name, encoding="utf-8")
-    # Check if the threat_type is valid
-    if threat_type not in ['medical', 'malicious']:
-        raise ValueError("Invalid threat type. Please choose 'medical' or 'malicious'.")
+        raise ValueError("Invalid threat type. Please choose 'malicious', 'medical', or 'normal'.")
     
-    # Select the first three columns (Stage_1_Normal, Stage_2_Questionable, Stage_3_Normal)
-    selected_columns = df[['Stage_1_Normal', 'Stage_2_Questionable', 'Stage_3_Normal']]
-    
-    # Depending on the threat type, select the appropriate column (Stage_4_Medical or Stage_4_Malicious)
-    if threat_type == "medical":
-        threat_column = df['Stage_4_Medical']
-    else:
-        threat_column = df['Stage_4_Malicious']
-    
-    # Combine the selected columns and threat column into a new DataFrame
-    combined_df = selected_columns.copy()
-    combined_df['threat'] = threat_column
-    
-    #pick a random row
-    random_row = combined_df.sample(n=1).iloc[0]
-    
-    return random_row
-
-
-def generate_timeseries_tweets(dest, num_tweets,threat_types):
-    tweets = []
-    for threat_type in threat_types:
-        if threat_type.lower() == "normal":
-            prompt = "Only generate a normal tweet about something random"
-        else:
-            for i in range(num_tweets):
-                tweet_id = uuid.uuid4().int
-                user_id = uuid.uuid4().int
-                for i in range(4):
-                    if(i == 0):
-                        created_at = generate_iso_date()
-                    else:
-                        created_at = generate_iso_date_increment(tweets[i-1]["created_at"])
-                    if threat_type.lower() == "normal":
-                        prompt = "Only generate a normal tweet about something random"
-                    else:
-                        scenario = select_scenario_time_series(threat_type.lower())
-                        prompt = f"Only generate one tweet based on this scenario nothing else: {scenario.iloc[i]}."
-
-                    tweet_response = generate_response(prompt)
-                    username_response = generate_response("Only generate a random twitter username")
-
-                    tweet_object = {
-                        "id": tweet_id,
-                        "id_str": str(tweet_id),
-                        "created_at": created_at,
-                        "text": tweet_response,
-                        "user": {
-                            "id": user_id,
-                            "id_str": str(user_id),
-                            "name": username_response,
-                            "screen_name": str(username_response.replace(" ", ""))
-                        }
-                    }
-
-                    tweets.append({
-                        "created_at": tweet_object["created_at"],
-                        "tweet_id": tweet_object["id"],
-                        "tweet_id_str": tweet_object["id_str"],
-                        "tweet": tweet_object["text"],
-                        "threat_type": threat_type,
-                        "user_json": json.dumps(tweet_object["user"]),
-                        "tweet_schema": json.dumps(tweet_object),
-                        "user_id": tweet_object["user"]["id"],
-                        "user_id_str": tweet_object["user"]["id_str"],
-                        "user_name": tweet_object["user"]["name"],
-                        "screen_name": tweet_object["user"]["screen_name"]
-                    })
-
-                    with open(dest, mode="a", newline="") as file:
-                        writer = csv.DictWriter(file, fieldnames=tweets[i].keys())
-                        if has_header(dest):
-                            writer.writeheader()    
-                        
-                        writer.writerows(tweets)
-    return 1
-    
-
+    return prompt
 
 def generate_tweets(dest, num_tweets, threat_types):
+    # Load data from new CSV files
+    profiles = load_csv_data("character_profiles.csv")
+    tones = load_csv_data("tones.csv")
+    malicious_scenarios = load_csv_data("malicious_scenarios.csv")
+    medical_scenarios = load_csv_data("medical_scenarios.csv")
+    prompts = load_csv_data("prompts.csv")
+
     tweets = []
     for threat_type in threat_types:
         for i in range(num_tweets):
@@ -150,11 +67,7 @@ def generate_tweets(dest, num_tweets, threat_types):
             user_id = uuid.uuid4().int
             created_at = generate_iso_date()
 
-            if threat_type.lower() == "normal":
-                prompt = "Only generate a normal tweet about something random"
-            else:
-                scenario = select_scenario(threat_type.lower())
-                prompt = f"Only generate one tweet based on this scenario nothing else: {scenario}."
+            prompt = build_prompt(threat_type.lower(), prompts, profiles, tones, malicious_scenarios, medical_scenarios)
 
             tweet_response = generate_response(prompt)
             username_response = generate_response("Only generate a random twitter username")
@@ -188,9 +101,127 @@ def generate_tweets(dest, num_tweets, threat_types):
                 "screen_name": tweet_object["user"]["screen_name"]
             })
 
-            with open(dest, mode="a", newline="") as file:
-                writer = csv.DictWriter(file, fieldnames=tweets[i].keys())
-                if has_header(dest):
-                    writer.writeheader()       
-                writer.writerows(tweets)
+        with open(dest, mode="a", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
+            if has_header(dest):
+                writer.writeheader()
+            writer.writerows(tweets)
+    
     return 1
+
+def generate_timeseries_tweets(dest, num_tweets, threat_types):
+    # Load data from CSV files
+    profiles = load_csv_data("character_profiles.csv")
+    tones = load_csv_data("tones.csv")
+    malicious_scenarios = load_csv_data("malicious_scenarios.csv")
+    medical_scenarios = load_csv_data("medical_scenarios.csv")
+    prompts = load_csv_data("prompts.csv")
+
+    # Hardcode tone pools for Stages 1 and 3 to ensure positive/neutral
+    stage1_tones = ["Casual"]  # Stage 1: Positive or neutral
+    stage2_tones = ["Frustrated", "Nervous", "Exhausted", "Angry"]  # Stage 2: Stressful tones
+    stage3_tones = ["Casual"]  # Stage 3: Neutral recovery
+
+    tweets = []
+    for threat_type in threat_types:
+        if threat_type.lower() == "normal":
+            # Standalone normal tweets
+            prompt = build_prompt("normal", prompts, profiles, tones, malicious_scenarios, medical_scenarios)
+            for i in range(num_tweets):
+                tweet_id = uuid.uuid4().int
+                user_id = uuid.uuid4().int
+                created_at = generate_iso_date()
+                tweet_response = generate_response(prompt)
+                username_response = generate_response("Only generate a random twitter username")
+                tweet_object = {
+                    "id": tweet_id,
+                    "id_str": str(tweet_id),
+                    "created_at": created_at,
+                    "text": tweet_response,
+                    "user": {
+                        "id": user_id,
+                        "id_str": str(user_id),
+                        "name": username_response,
+                        "screen_name": username_response.replace(" ", "")
+                    }
+                }
+                tweets.append({
+                    "created_at": tweet_object["created_at"],
+                    "tweet_id": tweet_object["id"],
+                    "tweet_id_str": tweet_object["id_str"],
+                    "tweet": tweet_object["text"],
+                    "threat_type": threat_type,
+                    "user_json": json.dumps(tweet_object["user"]),
+                    "tweet_schema": json.dumps(tweet_object),
+                    "user_id": tweet_object["user"]["id"],
+                    "user_id_str": tweet_object["user"]["id_str"],
+                    "user_name": tweet_object["user"]["name"],
+                    "screen_name": tweet_object["user"]["screen_name"]
+                })
+        else:
+            # Time series for malicious or medical
+            for _ in range(num_tweets):
+                profile = random.choice(profiles)  # Consistent across stages
+                user_id = uuid.uuid4().int
+                stages = [
+                    ("Generate a short, conversational tweet about enjoying work", random.choice(stage1_tones)),
+                    ("Generate a short, conversational tweet hinting at workplace stress or frustration", random.choice(stage2_tones)),
+                    ("Generate a short, conversational tweet about feeling better at work", random.choice(stage3_tones)),
+                    (build_prompt(threat_type.lower(), prompts, [profile], tones, malicious_scenarios, medical_scenarios), None)
+                ]
+                
+                for i in range(4):
+                    tweet_id = uuid.uuid4().int
+                    if i == 0:
+                        created_at = generate_iso_date()
+                    else:
+                        created_at = generate_iso_date_increment(tweets[-1]["created_at"])
+                    
+                    prompt = stages[i][0]
+                    if i < 3:  # Add tone and profile for Stages 1-3
+                        prompt += f"\n- Character Profile: {profile}\n- Desired Tone: {stages[i][1]}"
+                    else:  # Stage 4 already includes profile and tone
+                        pass
+                    
+                    tweet_response = generate_response(prompt)
+                    username_response = generate_response("Only generate a random twitter username")
+                    
+                    tweet_object = {
+                        "id": tweet_id,
+                        "id_str": str(tweet_id),
+                        "created_at": created_at,
+                        "text": tweet_response,
+                        "user": {
+                            "id": user_id,
+                            "id_str": str(user_id),
+                            "name": username_response,
+                            "screen_name": username_response.replace(" ", "")
+                        }
+                    }
+                    
+                    tweets.append({
+                        "created_at": tweet_object["created_at"],
+                        "tweet_id": tweet_object["id"],
+                        "tweet_id_str": tweet_object["id_str"],
+                        "tweet": tweet_object["text"],
+                        "threat_type": f"{threat_type}_stage_{i+1}",
+                        "user_json": json.dumps(tweet_object["user"]),
+                        "tweet_schema": json.dumps(tweet_object),
+                        "user_id": tweet_object["user"]["id"],
+                        "user_id_str": tweet_object["user"]["id_str"],
+                        "user_name": tweet_object["user"]["name"],
+                        "screen_name": tweet_object["user"]["screen_name"]
+                    })
+    
+    with open(dest, mode="a", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
+        if has_header(dest):
+            writer.writeheader()
+        writer.writerows(tweets)
+    
+    return 1
+
+# Example usage
+if __name__ == "__main__":
+    generate_tweets("tweets_output.csv", 2, ["Malicious", "Medical", "Normal"])
+    generate_timeseries_tweets("timeseries_tweets.csv", 1, ["Medical", "Malicious"])
