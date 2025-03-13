@@ -2,7 +2,6 @@ import csv, json, uuid, pandas as pd, sys, os, random
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 
-# Allows us to grab model module from sibling directory
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../model')))
 from model import generate_response
 
@@ -30,39 +29,62 @@ def generate_iso_date_increment(prev_date):
 
 def load_csv_data(file_name):
     df = pd.read_csv(file_name, header=0, encoding="utf-8")
-    if 'Prompt - Sheet1.csv' in file_name:
-        return df.iloc[0].to_dict()
+    if 'Definition - Sheet1.csv' in file_name:
+        return df.iloc[0].to_dict()  # Return as dict for definitions
     else:
         if df.empty:
             raise ValueError(f"{file_name} is empty!")
-        return df.iloc[:, 0].dropna().tolist()
+        return df.iloc[:, 0].dropna().tolist()  # Return as list for others
 
-def build_prompt(threat_type, prompts, profiles, tones, malicious_scenarios, medical_scenarios):
-    prompt_dict = prompts
-    
+def build_prompt(threat_type, definitions, profiles, tones, malicious_scenarios, medical_scenarios):
+    # Base prompt templates
+    prompt_templates = {
+        "Malicious": "Generate a malicious tweet that subtly hints at an insider threat based on the information I provided below.",
+        "Medical": "Generate a medical tweet that subtly hints at an insider threat based on the information below, with a subtle clue to a medical condition but without stating it directly.",
+        "Normal": "Generate a short, conversational tweet about something random that's not an insider threat. Return only the tweet text and do not include an analysis breakdown."
+    }
+
+    if threat_type not in prompt_templates:
+        raise ValueError(f"Invalid threat_type '{threat_type}'. Only 'Normal', 'Medical', and 'Malicious' are allowed.")
+
     if threat_type == "Normal":
-        return prompt_dict["Normal"]
+        return prompt_templates["Normal"]
+
+    # Load definition from CSV
+    definition = definitions[threat_type]
     
+    # Randomly select attributes from provided data
     profile = random.choice(profiles)
     tone = random.choice(tones)
     
     if threat_type == "Malicious":
         scenario = random.choice(malicious_scenarios)
-        prompt = prompt_dict["Malicious"] + f"\n- Scenario: {scenario}\n- Character Profile: {profile}\n- Desired Tone: {tone}"
+        prompt = (
+            f"{prompt_templates['Malicious']}\n"
+            f"- Definition: {definition}\n"
+            f"- Scenario: {scenario}\n"
+            f"- Character Profile: {profile}\n"
+            f"- Desired Tone: {tone}"
+        )
     elif threat_type == "Medical":
         scenario = random.choice(medical_scenarios)
-        prompt = prompt_dict["Medical"] + f"\n- Scenario: {scenario}\n- Character Profile: {profile}\n- Desired Tone: {tone}"
-    else:
-        raise ValueError(f"Invalid threat_type '{threat_type}'. Only 'Normal', 'Medical', and 'Malicious' are allowed.")
-    
+        prompt = (
+            f"{prompt_templates['Medical']}\n"
+            f"- Definition: {definition}\n"
+            f"- Scenario: {scenario}\n"
+            f"- Character Profile: {profile}\n"
+            f"- Desired Tone: {tone}"
+        )
+
     return prompt
 
 def generate_tweets(dest, num_tweets, threat_types):
+    # Load required CSV data
+    definitions = load_csv_data("Definition - Sheet1.csv")
     profiles = load_csv_data("Character Profile - Sheet1.csv")
     tones = load_csv_data("Desired Tone - Sheet1.csv")
     malicious_scenarios = load_csv_data("Malicious Scenario - Sheet1.csv")
     medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
-    prompts = load_csv_data("Prompt - Sheet1.csv")
 
     tweets = []
     for threat_type in threat_types:
@@ -71,7 +93,7 @@ def generate_tweets(dest, num_tweets, threat_types):
             user_id = uuid.uuid4().int
             created_at = generate_iso_date()
 
-            prompt = build_prompt(threat_type, prompts, profiles, tones, malicious_scenarios, medical_scenarios)
+            prompt = build_prompt(threat_type, definitions, profiles, tones, malicious_scenarios, medical_scenarios)
             tweet_response = generate_response(prompt)
             username_response = generate_response("Generate a random Twitter username starting with '@' (max 15 characters). Return only the username.")
 
@@ -111,11 +133,12 @@ def generate_tweets(dest, num_tweets, threat_types):
     return 1
 
 def generate_timeseries_tweets(dest, num_tweets, threat_types):
+    # Load required CSV data
+    definitions = load_csv_data("Definition - Sheet1.csv")
     profiles = load_csv_data("Character Profile - Sheet1.csv")
     tones = load_csv_data("Desired Tone - Sheet1.csv")
     malicious_scenarios = load_csv_data("Malicious Scenario - Sheet1.csv")
     medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
-    prompts = load_csv_data("Prompt - Sheet1.csv")
 
     stage1_tones = ["Casual"]
     stage2_tones = ["Frustrated", "Nervous", "Exhausted", "Angry"]
@@ -124,7 +147,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
     tweets = []
     for threat_type in threat_types:
         if threat_type == "Normal":
-            prompt = build_prompt("Normal", prompts, profiles, tones, malicious_scenarios, medical_scenarios)
+            prompt = build_prompt("Normal", definitions, profiles, tones, malicious_scenarios, medical_scenarios)
             for i in range(num_tweets):
                 tweet_id = uuid.uuid4().int
                 user_id = uuid.uuid4().int
@@ -164,7 +187,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     ("Generate a short, conversational tweet about enjoying work", random.choice(stage1_tones)),
                     ("Generate a short, conversational tweet hinting at workplace stress or frustration", random.choice(stage2_tones)),
                     ("Generate a short, conversational tweet about feeling better at work", random.choice(stage3_tones)),
-                    (build_prompt(threat_type, prompts, [profile], tones, malicious_scenarios, medical_scenarios), None)
+                    (build_prompt(threat_type, definitions, [profile], tones, malicious_scenarios, medical_scenarios), None)
                 ]
                 
                 for i in range(4):
@@ -217,6 +240,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
     return 1
 
 if __name__ == "__main__":
-    #generate_tweets("tweets_output.csv", 2, ["Malicious", "Medical", "Normal"])
-    generate_tweets("tweets_output.csv", 2, ["Medical"])
-    #generate_timeseries_tweets("timeseries_tweets.csv", 1, ["Medical", "Malicious", "Normal"])
+    # Example usage
+    generate_tweets("test9_tweets_output.csv", 5, ["Malicious", "Medical", "Normal"])
+    # generate_tweets("tweets_output.csv", 2, ["Malicious", "Medical", "Normal"])
+    # generate_timeseries_tweets("timeseries_tweets.csv", 1, ["Medical", "Malicious", "Normal"])
