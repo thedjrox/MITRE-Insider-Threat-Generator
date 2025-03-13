@@ -54,11 +54,11 @@ def build_prompt(threat_type, prompts, profiles, tones, malicious_scenarios, med
 
 def generate_tweets(dest, num_tweets, threat_types):
     # Load data from new CSV files
-    profiles = load_csv_data("Character Profile -Sheet1.csv")
-    tones = load_csv_data("Tones -Sheet1.csv")
-    malicious_scenarios = load_csv_data("Malicious Scenarios -Sheet1.csv")
-    medical_scenarios = load_csv_data("Medical Scenarios -Sheet1.csv")
-    prompts = load_csv_data("Prompts -Sheet1.csv")
+    profiles = load_csv_data("Character Profile - Sheet1.csv")
+    tones = load_csv_data("Desired Tone - Sheet1.csv")
+    malicious_scenarios = load_csv_data("Malicious Scenario - Sheet1.csv")
+    medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
+    prompts = load_csv_data("Prompt - Sheet1.csv")
 
     tweets = []
     for threat_type in threat_types:
