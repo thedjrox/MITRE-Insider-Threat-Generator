@@ -201,10 +201,11 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     ("Generate a short, conversational tweet about feeling better at work", random.choice(stage3_tones)),
                     (build_prompt(threat_type, definitions, [profile], tones, malicious_scenarios, medical_scenarios), None)
                 ]
-                
+
+                tweet_id = uuid.uuid4().int
+                username_response = generate_response("Generate a random Twitter username starting with '@' (max 15 characters). Return only the username.")
                 dates = []
-                for i in range(4):
-                    tweet_id = uuid.uuid4().int
+                for i in range(4): 
                     if i == 0:
                         created_at = generate_iso_date()
                         dates.append(created_at)
@@ -217,8 +218,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                         prompt += f"\n- Character Profile: {profile}\n- Desired Tone: {stages[i][1]}"
                     
                     tweet_response = generate_response(prompt)
-                    username_response = generate_response("Generate a random Twitter username starting with '@' (max 15 characters). Return only the username.")
-                    
+
                     tweet_object = {
                         "id": tweet_id,
                         "id_str": str(tweet_id),
