@@ -28,7 +28,11 @@ def generate_iso_date_increment(prev_date):
     return new_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
 
 def load_csv_data(file_name):
-    df = pd.read_csv(file_name, header=0, encoding="utf-8")
+    dir_path = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(dir_path, file_name)
+
+    df = pd.read_csv(file_path, header=0, encoding="utf-8")
+
     if 'Definition - Sheet1.csv' in file_name:
         return df.iloc[0].to_dict()  # Return as dict for definitions
     else:

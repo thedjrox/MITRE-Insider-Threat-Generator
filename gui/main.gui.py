@@ -13,12 +13,12 @@ def browse_file():
 
 def on_generate():
     # Collect user inputs from the GUI
-    button.config(state="disabled", text="Generating Tweets...")
     print("Generating Tweets")
     destination = dest_input.get()
     num_tweets = int(num_tweets_input.get())
     generation_type = time_or_single_option.get()
     selected_threat_types = [listbox.get(i) for i in listbox.curselection()]
+    button.config(state="disabled", text="Generating Tweets...")
 
     # Call the back-end function with the collected inputs
     if(generation_type == "Single"):
