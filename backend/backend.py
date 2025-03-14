@@ -152,10 +152,18 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
     for threat_type in threat_types:
         if threat_type == "Normal":
             prompt = build_prompt("Normal", definitions, profiles, tones, malicious_scenarios, medical_scenarios)
+            dates = []
             for i in range(num_tweets):
                 tweet_id = uuid.uuid4().int
                 user_id = uuid.uuid4().int
-                created_at = generate_iso_date()
+
+                if i == 1:
+                    created_at = generate_iso_date()
+                    dates.append(created_at)
+                else:
+                    created_at = generate_iso_date_increment(dates[i-1])
+                    dates.append(created_at)
+
                 tweet_response = generate_response(prompt)
                 username_response = generate_response("Generate a random Twitter username starting with '@' (max 15 characters). Return only the username.")
                 tweet_object = {
@@ -194,12 +202,15 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     (build_prompt(threat_type, definitions, [profile], tones, malicious_scenarios, medical_scenarios), None)
                 ]
                 
+                dates = []
                 for i in range(4):
                     tweet_id = uuid.uuid4().int
                     if i == 0:
                         created_at = generate_iso_date()
+                        dates.append(created_at)
                     else:
-                        created_at = generate_iso_date_increment(tweets[-1]["created_at"])
+                        created_at = generate_iso_date_increment(dates[i-1])
+                        dates.append(created_at)
                     
                     prompt = stages[i][0]
                     if i < 3:
