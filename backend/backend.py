@@ -203,7 +203,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                 tweet_id = uuid.uuid4().int
                 user_id = uuid.uuid4().int
 
-                if i == 1:
+                if i == 0:
                     created_at = generate_iso_date()
                     dates.append(created_at)
                 else:
