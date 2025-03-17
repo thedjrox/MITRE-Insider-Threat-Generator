@@ -2,6 +2,7 @@ import csv, json, uuid, pandas as pd, sys, os, random
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import re
+import names
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../model")))
 from model import generate_response
@@ -126,9 +127,12 @@ def generate_tweets(dest, num_tweets, threat_types):
                 medical_scenarios,
             )
             tweet_response = generate_response(prompt)
-            username_response = generate_response(
-                "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
-            )
+            # username_response = generate_response(
+            #     "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
+            # )
+            username_response = names.get_full_name()
+            random_number = random.randint(1, 49)
+            just_name = str(username_response.replace(" ", ""))
             # just_tweet = re.search(r'"(.*?)"', tweet_response).group(1)
             just_tweet = extract_after_first_quote(tweet_response)
 
@@ -140,8 +144,9 @@ def generate_tweets(dest, num_tweets, threat_types):
                 "user": {
                     "id": user_id,
                     "id_str": str(user_id),
-                    "name": username_response,
-                    "screen_name": str(username_response.replace(" ", "")),
+                    # "name": username_response,
+                    "name": f"@{just_name}{random_number}",
+                    "screen_name": f"@{just_name}{random_number}",
                 },
             }
 
@@ -206,9 +211,12 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     dates.append(created_at)
 
                 tweet_response = generate_response(prompt)
-                username_response = generate_response(
-                    "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
-                )
+                # username_response = generate_response(
+                #     "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
+                # )
+                username_response = names.get_full_name()
+                random_number = random.randint(1, 49)
+                just_name = str(username_response.replace(" ", ""))
                 just_tweet = extract_after_first_quote(tweet_response)
                 tweet_object = {
                     "id": tweet_id,
@@ -218,8 +226,9 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     "user": {
                         "id": user_id,
                         "id_str": str(user_id),
-                        "name": username_response,
-                        "screen_name": username_response.replace(" ", ""),
+                        # "name": username_response,
+                        "name": f"@{just_name}{random_number}",
+                        "screen_name": f"@{just_name}{random_number}",
                     },
                 }
                 tweets.append(
@@ -268,9 +277,12 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                 ]
 
                 tweet_id = uuid.uuid4().int
-                username_response = generate_response(
-                    "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
-                )
+                # username_response = generate_response(
+                #     "Generate a random Twitter username starting with '@' (max 15 characters). Return only the username."
+                # )
+                username_response = names.get_full_name()
+                random_number = random.randint(1, 49)
+                just_name = str(username_response.replace(" ", ""))
                 dates = []
                 for i in range(4):
                     if i == 0:
@@ -295,8 +307,9 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                         "user": {
                             "id": user_id,
                             "id_str": str(user_id),
-                            "name": username_response,
-                            "screen_name": username_response.replace(" ", ""),
+                            # "name": username_response,
+                            "name": f"@{just_name}{random_number}",
+                            "screen_name": f"@{just_name}{random_number}",
                         },
                     }
 
