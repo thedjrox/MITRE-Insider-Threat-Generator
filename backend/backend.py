@@ -52,13 +52,13 @@ def load_csv_data(file_name):
 
 
 def build_prompt(
-    threat_type, definitions, profiles, tones, malicious_scenarios, medical_scenarios
+    threat_type, definitions, profiles, tones, malicious_scenarios, medical_scenarios, normal_scenarios
 ):
     # Base prompt templates
     prompt_templates = {
         "Malicious": "Generate a malicious tweet that subtly hints at an insider threat based on the information I provided below. Return just the tweet text and do not include an analysis breakdown.",
         "Medical": "Generate a medical tweet that subtly hints at an insider threat based on the information below, with a subtle clue to a medical condition but without stating it directly. Return only the tweet text and do not include an analysis breakdown.",
-        "Normal": "Generate a short, conversational tweet about something random that's not an insider threat. Return only the tweet text and do not include an analysis breakdown.",
+        "Normal": "Generate a short, conversational tweet based on the information below. Return only the tweet text and do not include an analysis breakdown.",
     }
 
     if threat_type not in prompt_templates:
@@ -66,15 +66,26 @@ def build_prompt(
             f"Invalid threat_type '{threat_type}'. Only 'Normal', 'Medical', and 'Malicious' are allowed."
         )
 
-    if threat_type == "Normal":
-        return prompt_templates["Normal"]
-
-    # Load definition from CSV
-    definition = definitions[threat_type]
-
+    
     # Randomly select attributes from provided data
     profile = random.choice(profiles)
     tone = random.choice(tones)
+
+    # Load definition from CSV
+    definition = definitions[threat_type]  
+
+
+    if threat_type == "Normal":
+        scenario = random.choice(normal_scenarios)
+        prompt = (
+            f"{prompt_templates['Normal']}\n"
+            f"- Definition: {definition}\n"
+            f"- Scenario: {scenario}\n"
+            f"- Character Profile: {profile}\n"
+            f"- Desired Tone: {tone}"
+        )
+        return prompt
+
 
     if threat_type == "Malicious":
         scenario = random.choice(malicious_scenarios)
@@ -110,6 +121,7 @@ def generate_tweets(dest, num_tweets, threat_types):
     tones = load_csv_data("Desired Tone - Sheet1.csv")
     malicious_scenarios = load_csv_data("Malicious Scenario - Sheet1.csv")
     medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
+    normal_scenarios = load_csv_data("Normal Scenario - Sheet1.csv")
 
     tweets = []
     for threat_type in threat_types:
@@ -125,6 +137,7 @@ def generate_tweets(dest, num_tweets, threat_types):
                 tones,
                 malicious_scenarios,
                 medical_scenarios,
+                normal_scenarios
             )
             tweet_response = generate_response(prompt)
             # username_response = generate_response(
@@ -182,6 +195,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
     tones = load_csv_data("Desired Tone - Sheet1.csv")
     malicious_scenarios = load_csv_data("Malicious Scenario - Sheet1.csv")
     medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
+    normal_scenarios = load_csv_data("Normal Scenario - Sheet1.csv")
 
     stage1_tones = ["Casual"]
     stage2_tones = ["Frustrated", "Nervous", "Exhausted", "Angry"]
@@ -197,6 +211,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                 tones,
                 malicious_scenarios,
                 medical_scenarios,
+                normal_scenarios
             )
             dates = []
             for i in range(num_tweets):
@@ -271,6 +286,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                             tones,
                             malicious_scenarios,
                             medical_scenarios,
+                            normal_scenarios
                         ),
                         None,
                     ),
@@ -340,6 +356,6 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
 
 if __name__ == "__main__":
     # Example usage
-    generate_tweets("test9_tweets_output.csv", 5, ["Malicious", "Medical", "Normal"])
+    generate_tweets("test9_tweets_output.csv", 3, ["Normal"])
     # generate_tweets("tweets_output.csv", 2, ["Malicious", "Medical", "Normal"])
     # generate_timeseries_tweets("timeseries_tweets.csv", 1, ["Medical", "Malicious", "Normal"])
