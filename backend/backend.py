@@ -17,24 +17,36 @@ def has_header(csv_file):
         except StopIteration:
             return True
 
-
+#New Date Format YYYY-MM-DD HH:MM:SS
 def generate_iso_date():
     random_days = random.randint(0, 365 * 5)
-    random_time = timedelta(days=random_days)
+    random_time = timedelta(
+        days=random_days,
+        hours=random.randint(0, 23),
+        minutes=random.randint(0, 59),
+        seconds=random.randint(0, 59)
+    )
     random_date = datetime.now() - random_time
-    return random_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
+    return random_date.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def generate_iso_date_increment(prev_date):
-    original_date = datetime.strptime(prev_date, "%a %b %d %H:%M:%S +0000 %Y")
+def generate_iso_date_increment(prev_date, stage):
+    original_date = datetime.strptime(prev_date, "%Y-%m-%d %H:%M:%S")
+
     random_days = random.randint(1, 30)
     random_months = random.randint(1, 12)
+    
+    random_hours = random.randint(8, 19) if stage < 4 else (random.randint(0, 6) - 2) % 24
+    random_minutes = random.randint(0, 59)
+    random_seconds = random.randint(0, 59)
+
     new_date = (
         original_date
         + relativedelta(months=random_months)
-        + timedelta(days=random_days)
+        + timedelta(days=random_days, hours=random_hours, minutes=random_minutes, seconds=random_seconds)
     )
-    return new_date.strftime("%a %b %d %H:%M:%S +0000 %Y")
+
+    return new_date.strftime("%Y-%m-%d %H:%M:%S")  # Format: YYYY-MM-DD HH:MM:SS
 
 
 def load_csv_data(file_name):
@@ -222,7 +234,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                     created_at = generate_iso_date()
                     dates.append(created_at)
                 else:
-                    created_at = generate_iso_date_increment(dates[i - 1])
+                    created_at = generate_iso_date_increment(dates[i - 1], i)
                     dates.append(created_at)
 
                 tweet_response = generate_response(prompt)
@@ -305,7 +317,7 @@ def generate_timeseries_tweets(dest, num_tweets, threat_types):
                         created_at = generate_iso_date()
                         dates.append(created_at)
                     else:
-                        created_at = generate_iso_date_increment(dates[i - 1])
+                        created_at = generate_iso_date_increment(dates[i - 1], i)
                         dates.append(created_at)
 
                     prompt = stages[i][0]
