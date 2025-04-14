@@ -63,8 +63,9 @@ Here are examples of generated tweets for each type:
 
 ## Project Structure
 
-- `generate_tweet.py`: Main script to generate tweets based on the specified threat type.
-- `model/`: Directory containing the fine-tuned model files.
+- `backend/`: Directory containing main script to generate tweets based on the specified threat type.
+- `model/`: Directory containing the model files.
+- `gui/`: Directory containing the code for UI
 - `config.py`: Configuration file for model and tweet generation settings.
 - `requirements.txt`: Lists required Python packages.
 
