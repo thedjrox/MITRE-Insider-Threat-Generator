@@ -1,22 +1,33 @@
 # Insider Threat Tweet Generator
 
-This project is a Python-based application that generates tweets simulating different types of insider threats using a fine-tuned pre-trained AI model. The program can generate tweets in multiple categories, including **Medical**, **Malicious**, and **Normal** tweets, to facilitate realistic insider threat simulations. It leverages a fine-tuned Transformer model to produce varied and contextually accurate outputs for each threat type.
+This project is a Python-based desktop application with a graphical user interface (GUI) that generates tweets simulating different types of insider threats using a fine-tuned pre-trained AI model. It supports multiple tweet categories including **Medical**, **Malicious**, and **Normal** to facilitate realistic insider threat simulations. The application leverages a fine-tuned Transformer model to produce contextually accurate outputs for each threat type.
 
 ## Features
 
-- **Multi-Category Tweet Generation**: Generate tweets for various insider threat types:
-  - **Medical**: Tweets related to insider threats in the medical sector, simulating potential data leaks or misuse of sensitive medical information.
-  - **Malicious**: Tweets representing malicious insider behavior, such as sabotage, espionage, or unauthorized access.
-  - **Normal**: General, non-threatening tweets that mimic regular insider communications.
-- **Pretrained Model Fine-Tuning**: Utilizes a fine-tuned pre-trained AI model to produce realistic and contextually accurate tweet outputs.
-- **Customization Options**: Adjust the tone and style of tweets to appear more overt or subtle based on the selected threat type.
+- **Graphical User Interface**: Easily generate tweets through an intuitive GUI.
+- **Multi-Category Tweet Generation**: Choose from:
+  - **Medical** – Simulating data leaks or sensitive information misuse in healthcare settings.
+  - **Malicious** – Mimicking harmful insider actions like sabotage or espionage.
+  - **Normal** – Representing typical, non-threatening communication.
+- **Time Series or Single Tweet Mode**: Choose between generating a single tweet or a series of tweets over time.
+- **Export Capability**: Save the generated tweets directly to a file of your choice.
+- **Pretrained Model Fine-Tuning**: Built upon a fine-tuned AI language model for realism and contextual integrity.
+
+## GUI Input Options
+
+Upon launching the application, you can customize the tweet generation with the following fields:
+
+- **Export Destination**: Path to the output file (e.g., `tweets_output.csv`)
+- **Number of Tweets**: Select how many tweets to generate.
+- **Tweet Type(s)**: Choose one or more categories (Medical, Malicious, Normal).
+- **Generation Mode**: Select either **Single Tweet** or **Time Series** generation.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.10 or later
-- Required Python packages (install with `pip install -r requirements.txt`)
+- Required packages listed in `requirements.txt`
 
 ### Installation
 
@@ -29,21 +40,15 @@ This project is a Python-based application that generates tweets simulating diff
    ```bash
    pip install -r requirements.txt
    ```
-3. **Download Model**:
-   Ensure the pre-trained model is available locally. If using a custom model from Hugging Face or similar, specify the path or load it directly in the code.
 
 ### Usage
 
-To generate tweets, run the program from the command line and specify the type of threat tweet you want to create.
+To generate tweets, run the program from the command line.
 
   ```bash
-  python generate_tweet.py --threat_type [medical|malicious|normal]
+  python generate_tweet.py
   ```
 
-  Example:
-  ```bash
-  python generate_tweet.py --threat_type medical
-  ```
 ### Configuration
 
 You can adjust model settings and generation parameters in the `config.py` file.
