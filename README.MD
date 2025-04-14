@@ -11,7 +11,6 @@ This project is a Python-based desktop application with a graphical user interfa
   - **Normal** – Representing typical, non-threatening communication.
 - **Time Series or Single Tweet Mode**: Choose between generating a single tweet or a series of tweets over time.
 - **Export Capability**: Save the generated tweets directly to a file of your choice.
-- **Pretrained Model Fine-Tuning**: Built upon a fine-tuned AI language model for realism and contextual integrity.
 
 ## GUI Input Options
 
