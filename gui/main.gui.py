@@ -42,6 +42,11 @@ def on_generate():
     print("Done generating")
     button.config(state="normal", text="Generate")
 
+def handle_generate():
+    button.config(state=tk.DISABLED, text="Generating Tweets...")
+    root.after(100, on_generate)
+
+
 # GUI Setup
 root = tk.Tk()
 root.title("Data Generator Insider Threats")
@@ -87,7 +92,7 @@ listbox.grid(row=9, column=0, padx=10, pady=5, sticky="w")
 listbox.bind("<<ListboxSelect>>", on_listbox_select)
 
 # Generate Button
-button = ttk.Button(root, text="Generate", width=82, state=tk.DISABLED, command=lambda: (button.config(state=tk.DISABLED, text="Generating Tweets..."), on_generate()))
+button = ttk.Button(root, text="Generate", width=82, state=tk.DISABLED, command=handle_generate)
 button.grid(row=10, column=0, padx=10, pady=10, sticky="w")
 
 root.mainloop()
