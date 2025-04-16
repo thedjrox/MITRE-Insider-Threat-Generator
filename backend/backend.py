@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 import re
 import names
+from googletrans import Translator #added import
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../model")))
 from model import generate_response
@@ -125,7 +126,31 @@ def extract_after_first_quote(cell_value):
     match = re.search(r'"(.*?)"', cell_value)
     return match.group(1) if match else None
 
+#takes the original tweet and augments it
+def back_translate_tweet(tweet, target_language="es"):
+    """
+    Back-translates a tweet from English to target_language and back to English.
+    Args:
+        tweet (str): The original tweet text.
+        target_language (str): The intermediate language code (e.g., 'es' for Spanish).
+    Returns:
+        str: The back-translated tweet, or original tweet if translation fails.
+    """
+    translator = Translator()
+    try:
+        translated = translator.translate(tweet, dest=target_language).text
+        back_translated = translator.translate(translated, dest="en").text
 
+        #print("****TRANSLATED TWEET:****** " + back_translated)
+        return back_translated
+    except Exception as e:
+        print(f"Back-translation failed for tweet: {tweet}. Error: {e}")
+        return tweet
+
+# CHANGED: Updated generate_tweets to include back-translation augmentation
+# - Added augment_factor and langauges list
+# - Added loop to generate augmented tweets using back_translate_tweet
+# - Used generate_iso_date() for augmented tweet timestamps
 def generate_tweets(dest, num_tweets, threat_types):
     # Load required CSV data
     definitions = load_csv_data("Definition - Sheet1.csv")
@@ -135,7 +160,11 @@ def generate_tweets(dest, num_tweets, threat_types):
     medical_scenarios = load_csv_data("Medical Scenario - Sheet1.csv")
     normal_scenarios = load_csv_data("Normal Scenario - Sheet1.csv")
 
+    #list of languages that the back_translate_tweet() will randomly chose from
+    target_languages = ["es", "fr", "de", "it"]
     tweets = []
+    #each orginal tweet will generate augmented factor*original tweets = augmented tweets (ex. augemented_factor = 10, 100*10 -> 1,00 tweets)
+    augment_factor = 1
     for threat_type in threat_types:
         for i in range(num_tweets):
             tweet_id = uuid.uuid4().int
@@ -190,6 +219,41 @@ def generate_tweets(dest, num_tweets, threat_types):
                     "screen_name": tweet_object["user"]["screen_name"],
                 }
             )
+            
+            #creates a tweet object for each augmented tweet and adds it to tweets
+            for _ in range(augment_factor):
+                target_lang = random.choice(target_languages)
+                augmented_tweet = back_translate_tweet(just_tweet, target_lang)
+                new_tweet_id = uuid.uuid4().int
+                new_created_at = generate_iso_date()
+
+                augmented_tweet_object = {
+                    "id": new_tweet_id,
+                    "id_str": str(new_tweet_id),
+                    "created_at": new_created_at,
+                    "text": augmented_tweet,
+                    "user": {
+                        "id": user_id,
+                        "id_str": str(user_id),
+                        "name": f"@{just_name}{random_number}",
+                        "screen_name": f"@{just_name}{random_number}",
+                    },
+                }
+                tweets.append(
+                    {
+                        "created_at": augmented_tweet_object["created_at"],
+                        "tweet_id": augmented_tweet_object["id"],
+                        "tweet_id_str": augmented_tweet_object["id_str"],
+                        "tweet": augmented_tweet_object["text"],
+                        "threat_type": threat_type,
+                        "user_json": json.dumps(augmented_tweet_object["user"]),
+                        "tweet_schema": json.dumps(augmented_tweet_object),
+                        "user_id": augmented_tweet_object["user"]["id"],
+                        "user_id_str": augmented_tweet_object["user"]["id_str"],
+                        "user_name": augmented_tweet_object["user"]["name"],
+                        "screen_name": augmented_tweet_object["user"]["screen_name"],
+                    }
+                )
 
     with open(dest, mode="a", newline="") as file:
         writer = csv.DictWriter(file, fieldnames=tweets[0].keys())
