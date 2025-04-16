@@ -163,7 +163,7 @@ def generate_tweets(dest, num_tweets, threat_types):
     #list of languages that the back_translate_tweet() will randomly chose from
     target_languages = ["es", "fr", "de", "it"]
     tweets = []
-    #each orginal tweet will generate augmented factor*original tweets = augmented tweets (ex. augemented_factor = 10, 100*10 -> 1,00 tweets)
+    #augment_factor is how many agumented tweets per original tweet to generate
     augment_factor = 1
     for threat_type in threat_types:
         for i in range(num_tweets):
