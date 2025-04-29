@@ -22,7 +22,8 @@ def generate_response(prompt):
         data=json.dumps(
             {
                 # "model": "nvidia/llama-3.1-nemotron-70b-instruct:free",
-                "model": "nvidia/llama-3.1-nemotron-nano-8b-v1:free",
+                # "model": "nvidia/llama-3.1-nemotron-nano-8b-v1:free",
+                "model": "nvidia/llama-3.1-nemotron-ultra-253b-v1:free",
                 "messages": [{"role": "user", "content": prompt}],
             }
         ),
